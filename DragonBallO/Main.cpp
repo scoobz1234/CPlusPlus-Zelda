@@ -1,10 +1,11 @@
 //Using SDL and standard IO
 #include <SDL.h>
 #include <stdio.h>
+#include "SDLInit.h"
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
 
 int main( int argc, char* args[] )
 {
@@ -22,7 +23,7 @@ int main( int argc, char* args[] )
 	else
 	{
 		//Create window
-		window = SDL_CreateWindow( "Dragon Ball O!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		window = SDL_CreateWindow( "Stephen's Zelda Rip-Off!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 		if( window == NULL )
 		{
 			printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
