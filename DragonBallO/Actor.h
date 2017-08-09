@@ -3,6 +3,10 @@
 
 class Actor : public Living {
 public:
-	void Move() override;
+	//Base class destructor is ALWAYS implicitly called...
+	virtual ~Actor() override {}
 
+public:
+	void Move() override {};
+	void Attack() override {};
 };

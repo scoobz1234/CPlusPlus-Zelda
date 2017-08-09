@@ -3,13 +3,19 @@
 
 class Living : public Entity {
 public:
-	virtual void Move() = 0;
-
-	void SetHealth(int health, int maxHealth);
-	bool TakeDamage(int damage);
-
+	//Base class destructor is ALWAYS implicitly called...
+	virtual ~Living() override {}
 
 public:
+	virtual void Move() = 0;
+	virtual void Attack() = 0;
+
+	void SetHealth(int health, int maxHealth);
+	void SetMoveSpeed(float moveSpeed);
+
+	bool TakeDamage(int damage);
+
+protected:
 	int mMaxHealth{100};
 	int mHealth{100};
 

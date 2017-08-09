@@ -1,5 +1,7 @@
 #include "SDLInit.h"
 
+#define MILLI_PER_SEC 1000.f
+
 #define BG_R 0x68
 #define BG_G 0xB1
 #define BG_B 0x38
@@ -15,18 +17,45 @@ SDL_Window* gWindow = NULL;
 //The window renderer
 SDL_Renderer* gRenderer = NULL;
 
+//In milliseconds...
+float gDeltaTime = 0.f;
+
 //Checked in main...
 bool gQuitGame = false;
 
-//Key input...
-int gHorizVelocity = 0;
-int gVertVelocity = 0;
+//Keys held down...
+int gHorizKeysHeld = 0;	//keys a and d
+int gVertKeysHeld = 0;	//keys w and s
+
+//Keys pressed...
+bool gFirstKeyDown = false;		//keys 1
+bool gSecondKeyDown = false;	//keys 2
+bool gThirdKeyDown = false;		//keys 3
+bool gFourthKeyDown = false;	//keys 4
+
+//Keys released...
+bool gFirstKeyUp = false;		//keys 1
+bool gSecondKeyUp = false;	//keys 2
+bool gThirdKeyUp = false;		//keys 3
+bool gFourthKeyUp = false;	//keys 4
 
 namespace {
 	SDL_Event event;
 }
 
 void HandleKeyboardEvents() {
+	//Reset pressed keys here...
+	gFirstKeyDown = false;
+	gSecondKeyDown = false;
+	gThirdKeyDown = false;
+	gFourthKeyDown = false;
+
+	//Reset released keys here...
+	gFirstKeyUp = false;
+	gSecondKeyUp = false;
+	gThirdKeyUp = false;
+	gFourthKeyUp = false;
+
 	/* Poll for events */
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
@@ -35,11 +64,17 @@ void HandleKeyboardEvents() {
 		case SDL_KEYDOWN:
 			if (event.key.repeat == 0) {
 				switch (event.key.keysym.sym) {
-					case SDLK_w: gVertVelocity -= 1; break;		//up...
-					case SDLK_s: gVertVelocity += 1; break;		//down...
-					case SDLK_a: gHorizVelocity -= 1; break;	//left...
-					case SDLK_d: gHorizVelocity += 1; break;	//right...
-					default: break;
+				//Keys held down...
+				case SDLK_w: gVertKeysHeld -= 1; break;		//up...
+				case SDLK_s: gVertKeysHeld += 1; break;		//down...
+				case SDLK_a: gHorizKeysHeld -= 1; break;	//left...
+				case SDLK_d: gHorizKeysHeld += 1; break;	//right...
+				//Keys pressed...
+				case SDLK_e: gFirstKeyDown = true; break;
+				case SDLK_2: gSecondKeyDown = true; break;
+				case SDLK_3: gThirdKeyDown = true; break;
+				case SDLK_4: gFourthKeyDown = true; break;
+				default: break;
 				}
 			}
 			break;
@@ -47,10 +82,16 @@ void HandleKeyboardEvents() {
 		case SDL_KEYUP:
 			if (event.key.repeat == 0) {
 				switch (event.key.keysym.sym) {
-				case SDLK_w: gVertVelocity += 1; break;		//up...
-				case SDLK_s: gVertVelocity -= 1; break;		//down...
-				case SDLK_a: gHorizVelocity += 1; break;	//left...
-				case SDLK_d: gHorizVelocity -= 1; break;	//right...
+				//Keys held down...
+				case SDLK_w: gVertKeysHeld += 1; break;		//up...
+				case SDLK_s: gVertKeysHeld -= 1; break;		//down...
+				case SDLK_a: gHorizKeysHeld += 1; break;	//left...
+				case SDLK_d: gHorizKeysHeld -= 1; break;	//right...
+				//Keys released...
+				case SDLK_e: gFirstKeyUp = true; break;
+				case SDLK_2: gSecondKeyUp = true; break;
+				case SDLK_3: gThirdKeyUp = true; break;
+				case SDLK_4: gFourthKeyUp = true; break;
 				default: break;
 				}
 			}
@@ -170,14 +211,17 @@ void SDLInit::CleanupTexture(Entity &entity) {
 
 void SDLInit::DrawTexture(Entity &entity) {
 	//Set rendering space and render to screen
-	SDL_Rect renderRect = {entity.mXPos, entity.mYPos,
+	SDL_Rect renderRect = {(int)entity.mXPos, (int)entity.mYPos,
 		entity.mWidth, entity.mHeight };
 
-	////Set clip rendering dimensions
-	//if (clip != NULL) {
-	//	renderQuad.w = clip->w;
-	//	renderQuad.h = clip->h;
-	//}
+	auto *anchorOffset = entity.GetAnchorOffset();
+
+	//If the sprite size changes, the sprite will move. This offset
+	//	is for anchoring the sprite, so that it doesn't move.
+	if (anchorOffset != NULL) {
+		renderRect.x += anchorOffset->x;
+		renderRect.y += anchorOffset->y;
+	}
 
 	//Render to screen
 	SDL_RenderCopy(gRenderer, entity.mTexture,
@@ -192,13 +236,18 @@ void SDLInit::Render() {
 
 //TODO: add delta time to update...
 void SDLInit::Update(){
+	//Updating gDeltaTime in milliseconds...
+	static Uint32 lastTime = 0;
+	Uint32 runningTime = SDL_GetTicks();
+	gDeltaTime = (runningTime - lastTime)/MILLI_PER_SEC;
+	lastTime = runningTime;
+
 	//Checks for key presses...
 	HandleKeyboardEvents();
 
 	//Update screen
 	SDL_RenderPresent(gRenderer);
 
-	SDL_Delay(4);
 	//Wait two seconds
 	//SDL_Delay( 2000 );
 }

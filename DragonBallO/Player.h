@@ -3,6 +3,11 @@
 
 class Player : public Living {
 public:
-	void Move() override;
+	//Base class destructor is ALWAYS implicitly called...
+	Player() : Living() { mCollisionBlocks = true; };
+	virtual ~Player() override {}
 
+public:
+	void Move() override;
+	void Attack() override;
 };
