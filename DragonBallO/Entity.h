@@ -24,6 +24,7 @@ public:
 	void SetSpriteClip(int x, int y, uInt w, uInt h, uInt index);
 	void SetAnchorOffset(Int2 anchorOffset, uInt index);
 
+//		*** Collision setup ***
 	void ConfigureCollision(bool pushesOut, Int2 colliderOffset = { 0, 0 }, Int2 originOffset = { 0, 0 }) {
 		mCollisionBlocks = pushesOut; 
 		mColliderOffset = colliderOffset;
@@ -42,6 +43,7 @@ protected:
 	const char* mTexturePath;
 
 	float mXPos{0}, mYPos{0};
+	float eXPos{ 0 }, eYPos{ 0 };
 	int mWidth{0}, mHeight{0};
 
 	Int2 mColliderOffset{ 0, 0 };

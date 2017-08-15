@@ -1,4 +1,5 @@
 #include "Player.h"
+#include <iostream>
 
 #define ANIM_RIGHT_COUNT 2
 #define ANIM_LEFT_COUNT 2

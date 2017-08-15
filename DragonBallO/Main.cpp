@@ -1,5 +1,6 @@
 #include "GameManager.h"
 
+
 extern bool gQuitGame;
 
 int main( int argc, char* args[] )
