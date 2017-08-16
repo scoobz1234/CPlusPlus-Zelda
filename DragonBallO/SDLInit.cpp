@@ -1,5 +1,6 @@
 #include "SDLInit.h"
 
+
 #define MILLI_PER_SEC 1000.f
 
 #define BG_R 0x68

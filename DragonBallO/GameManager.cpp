@@ -2,6 +2,7 @@
 #include "SDLInit.h"
 #include "Player.h"
 #include "Actor.h"
+#include "Camera.h"
 
 extern SDL_Window* gWindow;
 extern SDL_Renderer* gRenderer;
@@ -13,6 +14,7 @@ extern int SCREEN_HEIGHT;		//TODO: currently not using...
 static SDLInit sdlInit;
 
 namespace {
+	Camera camera;
 	Player player;
 	Entity tree;
 	Entity tree2;
@@ -33,6 +35,8 @@ namespace {
 	Entity hedgeBottomRightSide;
 	Entity statueBird;
 	Entity news;
+	Entity gridGuide;
+
 }
 
 
@@ -58,6 +62,7 @@ void InitEntities() {
 	hedgeBottomRight.SetTexturePath("textures/Hedge_Top.png");
 	hedgeBottomRightSide.SetTexturePath("textures/Hedge_Top_left.png");
 	news.SetTexturePath("textures/NEWS.png");
+	gridGuide.SetTexturePath("textures/gridGuide.png");
 
 		//Loading textures...
 	sdlInit.LoadTexture(player);
@@ -80,6 +85,7 @@ void InitEntities() {
 	sdlInit.LoadTexture(hedgeBottomRightSide);
 	sdlInit.LoadTexture(statueBird);
 	sdlInit.LoadTexture(news);
+	sdlInit.LoadTexture(gridGuide);
 
 	//Setting position information...
 	player.SetPosition(0, 0);
@@ -102,6 +108,7 @@ void InitEntities() {
 	hedgeBottomRightSide.SetPosition(234, 165);
 	statueBird.SetPosition(125, 105);
 	news.SetPosition(86, 86);
+	gridGuide.SetPosition(0,0);
 
 	//Setting size information...
 	player.SetSize(50, 50);
@@ -124,6 +131,7 @@ void InitEntities() {
 	hedgeBottomRightSide.SetSize(20, 75);
 	statueBird.SetSize(45, 60);
 	news.SetSize(120, 120);
+	gridGuide.SetSize(640,480);
 
 	//Set sprite sheet texture coordinates...
 	player.InitSpriteSheet(0, 14, 6);
@@ -204,7 +212,9 @@ void GameManager::Cleanup(){
 	sdlInit.CleanupTexture(hedgeBottomRightSide);
 	sdlInit.CleanupTexture(statueBird);
 	sdlInit.CleanupTexture(news);
+	sdlInit.CleanupTexture(gridGuide);
 	sdlInit.Cleanup();
+
 }
 
 //TODO: Add deltatime later...
@@ -235,7 +245,9 @@ void GameManager::Update() {
 
 void GameManager::Render(){
 	sdlInit.Render();
+
 //		*** Anything here will be below the player (stepped on) ect.. ***
+	sdlInit.DrawTexture(gridGuide);
 	sdlInit.DrawTexture(steps);
 	sdlInit.DrawTexture(stepsHouse2);
 	sdlInit.DrawTexture(news);
@@ -249,15 +261,16 @@ void GameManager::Render(){
 	sdlInit.DrawTexture(hedgeBottomRight);
 	sdlInit.DrawTexture(hedgeBottomRightSide);
 	sdlInit.DrawTexture(black);
+
 //      *** Player drawn at this point ***
 	sdlInit.DrawTexture(player);
+
 //      *** Anything after here will appear in front of the player ***
 	sdlInit.DrawTexture(statueBird);
 	sdlInit.DrawTexture(tree);
 	sdlInit.DrawTexture(tree2);
 	sdlInit.DrawTexture(house2);
-	//sdlInit.DrawTexture(blocker);
-	//sdlInit.DrawTexture(blocker2);
+
 	
 	
 	

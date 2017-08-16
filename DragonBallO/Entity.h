@@ -25,13 +25,15 @@ public:
 	void SetAnchorOffset(Int2 anchorOffset, uInt index);
 
 //		*** Collision setup ***
-	void ConfigureCollision(bool pushesOut, Int2 colliderOffset = { 0, 0 }, Int2 originOffset = { 0, 0 }) {
+	void ConfigureCollision(bool pushesOut, Int2 colliderOffset = { 0, 0 }, Int2 originOffset = { 0, 0 }){
 		mCollisionBlocks = pushesOut; 
 		mColliderOffset = colliderOffset;
 		mOriginOffset = originOffset;
 	}
 		
 	bool CheckCollision(Entity &other);
+
+	MyMath::Float2 GetPosition();
 	
 	SDL_Rect* GetSpriteClip();
 	Int2* GetAnchorOffset();

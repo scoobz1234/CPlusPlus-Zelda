@@ -115,3 +115,8 @@ is for anchoring the sprite, so that it doesn't move.
 Entity::Int2* Entity::GetAnchorOffset() {
 	return mAnchorOffsets + mSpriteClipIndex;
 }
+
+MyMath::Float2 Entity::GetPosition() {
+	MyMath::Float2 pos{ mXPos, mYPos };
+	return pos;
+}

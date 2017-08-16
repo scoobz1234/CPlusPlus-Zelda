@@ -29,6 +29,11 @@ extern bool gFourthKeyUp;	//keys 4
 namespace {
 	int lastMoveIndex = 4;
 	int lastAttackIndex = 0;
+
+	float oldX = 0;
+	float oldY = 0;
+
+
 }
 
 namespace {
@@ -73,6 +78,14 @@ void Player::Move() {
 	//Update position...	//TODO: Should create velocity vector and normalize...
 	mXPos += gHorizKeysHeld * velocity;
 	mYPos += gVertKeysHeld * velocity;
+
+	//Tells you the position of the character in the console
+	if (oldX != mXPos || oldY != mYPos) {
+		std::cout << mXPos << " " << mYPos << std::endl;
+		oldX = mXPos;
+		oldY = mYPos;
+	}
+
 
 	//Update animations...
 	if (gHorizKeysHeld > 0) {
