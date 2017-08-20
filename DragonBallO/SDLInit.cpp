@@ -1,5 +1,5 @@
 #include "SDLInit.h"
-
+#include "Camera.h"
 
 #define MILLI_PER_SEC 1000.f
 
@@ -8,9 +8,11 @@
 #define BG_B 0x38
 #define BG_A 0xFF
 
-//Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+extern Camera gCamera;
+
+//Also camera dimension...
+extern const int SCREEN_WIDTH;
+extern const int SCREEN_HEIGHT;
 
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
@@ -28,13 +30,13 @@ bool gQuitGame = false;
 int gHorizKeysHeld = 0;	//keys a and d
 int gVertKeysHeld = 0;	//keys w and s
 
-//Keys pressed...
+						//Keys pressed...
 bool gFirstKeyDown = false;		//keys 1
 bool gSecondKeyDown = false;	//keys 2
 bool gThirdKeyDown = false;		//keys 3
 bool gFourthKeyDown = false;	//keys 4
 
-//Keys released...
+								//Keys released...
 bool gFirstKeyUp = false;		//keys 1
 bool gSecondKeyUp = false;	//keys 2
 bool gThirdKeyUp = false;		//keys 3
@@ -65,12 +67,12 @@ void HandleKeyboardEvents() {
 		case SDL_KEYDOWN:
 			if (event.key.repeat == 0) {
 				switch (event.key.keysym.sym) {
-				//Keys held down...
+					//Keys held down...
 				case SDLK_w: gVertKeysHeld -= 1; break;		//up...
 				case SDLK_s: gVertKeysHeld += 1; break;		//down...
 				case SDLK_a: gHorizKeysHeld -= 1; break;	//left...
 				case SDLK_d: gHorizKeysHeld += 1; break;	//right...
-				//Keys pressed...
+															//Keys pressed...
 				case SDLK_e: gFirstKeyDown = true; break;
 				case SDLK_2: gSecondKeyDown = true; break;
 				case SDLK_3: gThirdKeyDown = true; break;
@@ -83,12 +85,12 @@ void HandleKeyboardEvents() {
 		case SDL_KEYUP:
 			if (event.key.repeat == 0) {
 				switch (event.key.keysym.sym) {
-				//Keys held down...
+					//Keys held down...
 				case SDLK_w: gVertKeysHeld += 1; break;		//up...
 				case SDLK_s: gVertKeysHeld -= 1; break;		//down...
 				case SDLK_a: gHorizKeysHeld += 1; break;	//left...
 				case SDLK_d: gHorizKeysHeld -= 1; break;	//right...
-				//Keys released...
+															//Keys released...
 				case SDLK_e: gFirstKeyUp = true; break;
 				case SDLK_2: gSecondKeyUp = true; break;
 				case SDLK_3: gThirdKeyUp = true; break;
@@ -110,12 +112,12 @@ void HandleKeyboardEvents() {
 	}
 }
 
-bool SDLInit::Setup(){
+bool SDLInit::Setup() {
 	bool success = true;
 
 	//Initialize SDL
-	if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) {
-		printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		success = false;
 	}
 	else
@@ -126,9 +128,9 @@ bool SDLInit::Setup(){
 		}
 
 		//Create window				//TODO: Make this name global...
-		gWindow = SDL_CreateWindow( "Dragon Ball O!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-		if( gWindow == NULL ) {
-			printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
+		gWindow = SDL_CreateWindow("Dragon Ball O!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		if (gWindow == NULL) {
+			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 			success = false;
 		}
 		else
@@ -149,6 +151,9 @@ bool SDLInit::Setup(){
 					printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
 					success = false;
 				}
+				else {
+					SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
+				}
 			}
 		}
 	}
@@ -156,13 +161,13 @@ bool SDLInit::Setup(){
 	return success;
 }
 
-void SDLInit::LoadTexture(Entity &entity) {
+void SDLInit::LoadTexture(Sprite &sprite) {
 	//This is how we get our file name...
-	const char* filePath = entity.mTexturePath;
+	const char* filePath = sprite.mTexturePath;
 
 	//The final texture
 	SDL_Texture* newTexture = NULL;
-	
+
 	//Load image at specified path
 	SDL_Surface* loadedSurface = IMG_Load(filePath);
 	if (loadedSurface == NULL) {
@@ -178,8 +183,8 @@ void SDLInit::LoadTexture(Entity &entity) {
 			printf("Unable to create texture from %s! SDL Error: %s\n", filePath, SDL_GetError());
 		}
 		else {	//get image dimensions. Can call Entity.SetSize to override...
-			entity.mWidth = loadedSurface->w;
-			entity.mHeight = loadedSurface->h;
+			sprite.mSize.x = loadedSurface->w;
+			sprite.mSize.y = loadedSurface->h;
 		}
 
 		//Get rid of old loaded surface
@@ -187,35 +192,38 @@ void SDLInit::LoadTexture(Entity &entity) {
 	}
 
 	//Return success
-	entity.mTexture = newTexture;
+	sprite.mTexture = newTexture;
 }
 
-void SDLInit::SetColor(Entity &entity, Uint8 red, Uint8 green, Uint8 blue) {
+void SDLInit::SetColor(Sprite &sprite, Uint8 red, Uint8 green, Uint8 blue) {
 	//Modulate texture rgb
-	SDL_SetTextureColorMod(entity.mTexture, red, green, blue);
+	SDL_SetTextureColorMod(sprite.mTexture, red, green, blue);
 }
 
-void SDLInit::SetBlendMode(Entity &entity, SDL_BlendMode blending) {
+void SDLInit::SetBlendMode(Sprite &sprite, SDL_BlendMode blending) {
 	//Set blending function
-	SDL_SetTextureBlendMode(entity.mTexture, blending);
+	SDL_SetTextureBlendMode(sprite.mTexture, blending);
 }
 
-void SDLInit::SetAlpha(Entity &entity, Uint8 alpha) {
+void SDLInit::SetAlpha(Sprite &sprite, Uint8 alpha) {
 	//Modulate texture alpha
-	SDL_SetTextureAlphaMod(entity.mTexture, alpha);
+	SDL_SetTextureAlphaMod(sprite.mTexture, alpha);
 }
 
-void SDLInit::CleanupTexture(Entity &entity) {
-	SDL_DestroyTexture(entity.mTexture);
-	entity.mTexture = NULL;
+void SDLInit::CleanupSprite(Sprite &sprite) {
+	SDL_DestroyTexture(sprite.mTexture);
+	sprite.mTexture = NULL;
 }
 
-void SDLInit::DrawTexture(Entity &entity) {
+void SDLInit::DrawSprite(Sprite &sprite) {
 	//Set rendering space and render to screen
-	SDL_Rect renderRect = {(int)entity.mXPos, (int)entity.mYPos,
-		entity.mWidth, entity.mHeight };
+	SDL_Rect renderRect = {
+		int(sprite.mPos.x - gCamera.mPos.x),
+		int(sprite.mPos.y - gCamera.mPos.y),
+		sprite.mSize.x, sprite.mSize.y
+	};
 
-	auto *anchorOffset = entity.GetAnchorOffset();
+	auto *anchorOffset = sprite.GetAnchorOffset();
 
 	//If the sprite size changes, the sprite will move. This offset
 	//	is for anchoring the sprite, so that it doesn't move.
@@ -225,8 +233,28 @@ void SDLInit::DrawTexture(Entity &entity) {
 	}
 
 	//Render to screen
-	SDL_RenderCopy(gRenderer, entity.mTexture,
-		entity.GetSpriteClip(), &renderRect);
+	SDL_RenderCopy(gRenderer, sprite.mTexture,
+		sprite.GetSpriteClip(), &renderRect);
+}
+
+void SDLInit::DrawEntityCollider(Entity &entity) {
+	if (entity.mHasCollided) {
+		SDL_SetRenderDrawColor(gRenderer, 255, 0, 32, 48);
+		//TODO: Not the best place to put this, but works...
+		entity.mHasCollided = false;
+		entity.mBlockedSides = 0;
+	}
+	else {
+		SDL_SetRenderDrawColor(gRenderer, 32, 0, 255, 48);
+	}
+
+	SDL_Rect rectangle;
+
+	rectangle.x = int(entity.mPos.x + entity.mTopLeftCollOffset.x - gCamera.mPos.x);
+	rectangle.y = int(entity.mPos.y + entity.mTopLeftCollOffset.y - gCamera.mPos.y);
+	rectangle.w = int(entity.mSize.x - entity.mTopLeftCollOffset.x - entity.mBottomRightCollOffset.x);
+	rectangle.h = int(entity.mSize.y - entity.mTopLeftCollOffset.y - entity.mBottomRightCollOffset.y);
+	SDL_RenderFillRect(gRenderer, &rectangle);
 }
 
 void SDLInit::Render() {
@@ -236,11 +264,11 @@ void SDLInit::Render() {
 }
 
 //TODO: add delta time to update...
-void SDLInit::Update(){
+void SDLInit::Update() {
 	//Updating gDeltaTime in milliseconds...
 	static Uint32 lastTime = 0;
 	Uint32 runningTime = SDL_GetTicks();
-	gDeltaTime = (runningTime - lastTime)/MILLI_PER_SEC;
+	gDeltaTime = (runningTime - lastTime) / MILLI_PER_SEC;
 	lastTime = runningTime;
 
 	//Checks for key presses...
@@ -253,7 +281,7 @@ void SDLInit::Update(){
 	//SDL_Delay( 2000 );
 }
 
-void SDLInit::Cleanup(){
+void SDLInit::Cleanup() {
 	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow(gWindow);
 

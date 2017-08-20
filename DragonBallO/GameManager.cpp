@@ -1,41 +1,52 @@
 #include "GameManager.h"
 #include "SDLInit.h"
 #include "Player.h"
-#include "Actor.h"
 #include "Camera.h"
+#include "Entity.h"
+#include <iostream>
+
+#define PAN_CAMERA_INSTEAD false
+#define SHOW_COLLIDERS true
+
+//camera dimensions
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+
+const int WORLD_WIDTH = 2400;
+const int WORLD_HEIGHT = 2400;
 
 extern SDL_Window* gWindow;
 extern SDL_Renderer* gRenderer;
 
-//Screen dimension constants
-extern int SCREEN_WIDTH;		//TODO: currently not using...
-extern int SCREEN_HEIGHT;		//TODO: currently not using...
+
+Camera gCamera;
 
 static SDLInit sdlInit;
 
 namespace {
 	Camera camera;
 	Player player;
-	Entity tree;
-	Entity tree2;
-	Entity house;
-	Entity house2;
-	Entity blocker;
-	Entity blocker2;
-	Entity black;
-	Entity steps;
-	Entity stepsHouse2;
-	Entity hedgeTopLeft;
-	Entity hedgeTopRight;
-	Entity hedgeTopLeftSide;
-	Entity hedgeTopRightSide;
-	Entity hedgeBottomLeft;
-	Entity hedgeBottomRight;
-	Entity hedgeBottomLeftSide;
-	Entity hedgeBottomRightSide;
-	Entity statueBird;
-	Entity news;
-	Entity gridGuide;
+	Sprite tree;
+	Sprite tree2;
+	Sprite house;
+	Sprite house2;
+	Sprite blocker;
+	Sprite blocker2;
+	Sprite black;
+	Sprite steps;
+	Sprite stepsHouse2;
+	Sprite hedgeTopLeft;
+	Sprite hedgeTopRight;
+	Sprite hedgeTopLeftSide;
+	Sprite hedgeTopRightSide;
+	Sprite hedgeBottomLeft;
+	Sprite hedgeBottomRight;
+	Sprite hedgeBottomLeftSide;
+	Sprite hedgeBottomRightSide;
+	Sprite statueBird;
+	Sprite news;
+	Sprite buildingInside;
+
 
 }
 
@@ -62,7 +73,7 @@ void InitEntities() {
 	hedgeBottomRight.SetTexturePath("textures/Hedge_Top.png");
 	hedgeBottomRightSide.SetTexturePath("textures/Hedge_Top_left.png");
 	news.SetTexturePath("textures/NEWS.png");
-	gridGuide.SetTexturePath("textures/gridGuide.png");
+	buildingInside.SetTexturePath("textures/inside_bld.png");
 
 		//Loading textures...
 	sdlInit.LoadTexture(player);
@@ -85,16 +96,16 @@ void InitEntities() {
 	sdlInit.LoadTexture(hedgeBottomRightSide);
 	sdlInit.LoadTexture(statueBird);
 	sdlInit.LoadTexture(news);
-	sdlInit.LoadTexture(gridGuide);
+	sdlInit.LoadTexture(buildingInside);
 
 	//Setting position information...
-	player.SetPosition(0, 0);
-	tree.SetPosition(320, 120);
-	tree2.SetPosition(536, 120);
+	player.SetPosition(500,400);
+	tree.SetPosition(318, 120);
+	tree2.SetPosition(538, 120);
 	house.SetPosition(400, 100);
 	house2.SetPosition(400, 300);
 	blocker.SetPosition(401, 345);
-	blocker2.SetPosition(476, 345);
+	blocker2.SetPosition(470, 345);
 	black.SetPosition(430,338);
 	steps.SetPosition(440, 200);
 	stepsHouse2.SetPosition(440,391);
@@ -108,30 +119,30 @@ void InitEntities() {
 	hedgeBottomRightSide.SetPosition(234, 165);
 	statueBird.SetPosition(125, 105);
 	news.SetPosition(86, 86);
-	gridGuide.SetPosition(0,0);
+	buildingInside.SetPosition(1241,900);
 
 	//Setting size information...
-	player.SetSize(50, 50);
-	tree.SetSize(64, 78);
-	tree2.SetSize(64, 78);
-	house.SetSize(120, 100);
-	house2.SetSize(120,100);
-	steps.SetSize(40, 30);
-	stepsHouse2.SetSize(40, 30);
-	blocker.SetSize(46,57);
-	blocker2.SetSize(43,57);
-	black.SetSize(50, 50);
-	hedgeTopLeft.SetSize(65, 25);
-	hedgeTopLeftSide.SetSize(20, 75);
-	hedgeTopRight.SetSize(65, 25);
-	hedgeTopRightSide.SetSize(20, 75);
-	hedgeBottomLeft.SetSize(65, 25);
-	hedgeBottomLeftSide.SetSize(20, 75);
-	hedgeBottomRight.SetSize(65, 25);
-	hedgeBottomRightSide.SetSize(20, 75);
-	statueBird.SetSize(45, 60);
-	news.SetSize(120, 120);
-	gridGuide.SetSize(640,480);
+	player.SetSpriteSize(50, 50);
+	tree.SetSpriteSize(64, 78);
+	tree2.SetSpriteSize(64, 78);
+	house.SetSpriteSize(120, 100);
+	house2.SetSpriteSize(120,100);
+	steps.SetSpriteSize(40, 30);
+	stepsHouse2.SetSpriteSize(40, 30);
+	blocker.SetSpriteSize(47,56);
+	blocker2.SetSpriteSize(50,56);
+	black.SetSpriteSize(50, 50);
+	hedgeTopLeft.SetSpriteSize(65, 25);
+	hedgeTopLeftSide.SetSpriteSize(20, 75);
+	hedgeTopRight.SetSpriteSize(65, 25);
+	hedgeTopRightSide.SetSpriteSize(20, 75);
+	hedgeBottomLeft.SetSpriteSize(65, 25);
+	hedgeBottomLeftSide.SetSpriteSize(20, 75);
+	hedgeBottomRight.SetSpriteSize(65, 25);
+	hedgeBottomRightSide.SetSpriteSize(20, 75);
+	statueBird.SetSpriteSize(45, 60);
+	news.SetSpriteSize(120, 120);
+	buildingInside.SetSpriteSize(640,480);
 
 	//Set sprite sheet texture coordinates...
 	player.InitSpriteSheet(0, 14, 6);
@@ -162,24 +173,49 @@ void InitEntities() {
 	player.SetAnchorOffset({-11, -13}, 35);			//first right attack...=>2
 
 	//Setup collision...
-//		*** (collidable?, {ColliderX,ColliderY},{OriginX,OriginY}) ***
-	tree.ConfigureCollision(true, { 15, 15 }, { 5, 10 });
-	tree2.ConfigureCollision(true, { 15, 15 }, { 5, 10 });
-	house.ConfigureCollision(true, { 15, 7 }, { 3, 27 });
-	house2.ConfigureCollision(true, { 15, 7 }, { 3, 65 });
-	steps.ConfigureCollision(false);
-	blocker.ConfigureCollision(true, { 14, 7 }, { 0, 15 });
-	blocker2.ConfigureCollision(true, { 10, 7 }, { 0, 15 });
-	hedgeTopLeft.ConfigureCollision(true, { 14, 7 }, { 3, 15 });
-	hedgeTopLeftSide.ConfigureCollision(true, { 14, 7 }, { 3, 15 });
-	hedgeTopRight.ConfigureCollision(true, { 14, 7 }, { 3, 15 });
-	hedgeTopRightSide.ConfigureCollision(true, { 14, 7 }, { 3, 15 });
-	hedgeBottomLeft.ConfigureCollision(true, { 14, 7 }, { 3, 15 });
-	hedgeBottomLeftSide.ConfigureCollision(true, { 14, 7 }, { 3, 15 });
-	hedgeBottomRight.ConfigureCollision(true, { 14, 7 }, { 3, 15 });
-	hedgeBottomRightSide.ConfigureCollision(true, { 14, 7 }, { 3, 15 });
-	statueBird.ConfigureCollision(true, { 14, 17 }, { 3, 12 });
-	news.ConfigureCollision(false);
+//		*** (canbepushed,canteleport, {ColliderX,ColliderY},{OriginX,OriginY}) ***
+	player.ConfigureCollision(true,false, {5,10}, {28,15});
+	tree.ConfigureCollision(false,false, {0,15}, {0,0});
+	tree2.ConfigureCollision(false,false);
+	house.ConfigureCollision(false, false, {0,8}, {0,0});
+	house2.ConfigureCollision(false, false, {0,8}, {0,55});
+	steps.ConfigureCollision(false, false);
+	blocker.ConfigureCollision(false, false);
+	blocker2.ConfigureCollision(false, false);
+	hedgeTopLeft.ConfigureCollision(false, false);
+	hedgeTopLeftSide.ConfigureCollision(false, false);
+	hedgeTopRight.ConfigureCollision(false, false);
+	hedgeTopRightSide.ConfigureCollision(false, false);
+	hedgeBottomLeft.ConfigureCollision(false, false);
+	hedgeBottomLeftSide.ConfigureCollision(false, false);
+	hedgeBottomRight.ConfigureCollision(false, false);
+	hedgeBottomRightSide.ConfigureCollision(false, false);
+	statueBird.ConfigureCollision(false, false, {0,25}, {0,0});
+	news.ConfigureCollision(false, false);
+	black.ConfigureCollision(false,true, {0,0}, {0,40});
+	buildingInside.ConfigureCollision(false, false);
+
+
+
+	//checks collision?
+	player.AddCollidableEntity(tree);
+	player.AddCollidableEntity(tree2);
+	player.AddCollidableEntity(house);
+	player.AddCollidableEntity(house2);
+	player.AddCollidableEntity(blocker);
+	player.AddCollidableEntity(blocker2);
+	player.AddCollidableEntity(hedgeTopLeft);
+	player.AddCollidableEntity(hedgeTopLeftSide);
+	player.AddCollidableEntity(hedgeBottomLeft);
+	player.AddCollidableEntity(hedgeBottomLeftSide);
+	player.AddCollidableEntity(hedgeBottomRight);
+	player.AddCollidableEntity(hedgeBottomRightSide);
+	player.AddCollidableEntity(hedgeTopRight);
+	player.AddCollidableEntity(hedgeTopRightSide);
+	player.AddCollidableEntity(statueBird);
+	player.AddCollidableEntity(black);
+	player.AddCollidableEntity(buildingInside);
+	
 }
 
 bool GameManager::Init(){
@@ -192,53 +228,58 @@ bool GameManager::Init(){
 }
 
 void GameManager::Cleanup(){
-	sdlInit.CleanupTexture(player);
-	sdlInit.CleanupTexture(tree);
-	sdlInit.CleanupTexture(tree2);
-	sdlInit.CleanupTexture(house);
-	sdlInit.CleanupTexture(house2);
-	sdlInit.CleanupTexture(blocker);
-	sdlInit.CleanupTexture(blocker2);
-	sdlInit.CleanupTexture(black);
-	sdlInit.CleanupTexture(steps);
-	sdlInit.CleanupTexture(stepsHouse2);
-	sdlInit.CleanupTexture(hedgeTopLeft);
-	sdlInit.CleanupTexture(hedgeTopLeftSide);
-	sdlInit.CleanupTexture(hedgeTopRight);
-	sdlInit.CleanupTexture(hedgeTopRightSide);
-	sdlInit.CleanupTexture(hedgeBottomLeft);
-	sdlInit.CleanupTexture(hedgeBottomLeftSide);
-	sdlInit.CleanupTexture(hedgeBottomRight);
-	sdlInit.CleanupTexture(hedgeBottomRightSide);
-	sdlInit.CleanupTexture(statueBird);
-	sdlInit.CleanupTexture(news);
-	sdlInit.CleanupTexture(gridGuide);
+	sdlInit.CleanupSprite(player);
+	sdlInit.CleanupSprite(tree);
+	sdlInit.CleanupSprite(tree2);
+	sdlInit.CleanupSprite(house);
+	sdlInit.CleanupSprite(house2);
+	sdlInit.CleanupSprite(blocker);
+	sdlInit.CleanupSprite(blocker2);
+	sdlInit.CleanupSprite(black);
+	sdlInit.CleanupSprite(steps);
+	sdlInit.CleanupSprite(stepsHouse2);
+	sdlInit.CleanupSprite(hedgeTopLeft);
+	sdlInit.CleanupSprite(hedgeTopLeftSide);
+	sdlInit.CleanupSprite(hedgeTopRight);
+	sdlInit.CleanupSprite(hedgeTopRightSide);
+	sdlInit.CleanupSprite(hedgeBottomLeft);
+	sdlInit.CleanupSprite(hedgeBottomLeftSide);
+	sdlInit.CleanupSprite(hedgeBottomRight);
+	sdlInit.CleanupSprite(hedgeBottomRightSide);
+	sdlInit.CleanupSprite(statueBird);
+	sdlInit.CleanupSprite(news);
+	sdlInit.CleanupSprite(buildingInside);
 	sdlInit.Cleanup();
 
 }
 
 //TODO: Add deltatime later...
 void GameManager::Update() {
-	player.Move();
-	player.Attack();
+	tree.Update();
+	tree2.Update();
+	house.Update();
+	house2.Update();
+	blocker.Update();
+	blocker2.Update();
+	hedgeTopLeft.Update();
+	hedgeTopLeftSide.Update();
+	hedgeTopRight.Update();
+	hedgeTopRightSide.Update();
+	hedgeBottomLeft.Update();
+	hedgeBottomLeftSide.Update();
+	hedgeBottomRight.Update();
+	hedgeBottomRightSide.Update();
+	statueBird.Update();
+	buildingInside.Update();
+	player.Update();
 
-//          *** Collision ***
-	(void)tree.CheckCollision(player);
-	(void)tree2.CheckCollision(player);
-	(void)house.CheckCollision(player);
-	(void)house2.CheckCollision(player);
-	(void)blocker.CheckCollision(player);
-	(void)blocker2.CheckCollision(player);
-	(void)hedgeTopLeft.CheckCollision(player);
-	(void)hedgeTopLeftSide.CheckCollision(player);
-	(void)hedgeTopRight.CheckCollision(player);
-	(void)hedgeTopRightSide.CheckCollision(player);
-	(void)hedgeBottomLeft.CheckCollision(player);
-	(void)hedgeBottomLeftSide.CheckCollision(player);
-	(void)hedgeBottomRight.CheckCollision(player);
-	(void)hedgeBottomRightSide.CheckCollision(player);
-	(void)statueBird.CheckCollision(player);
 
+	if (PAN_CAMERA_INSTEAD) {
+		gCamera.PanWith(player);
+	}
+	else {
+		gCamera.LookAt(player);
+	}
 
 	sdlInit.Update();
 }
@@ -247,31 +288,52 @@ void GameManager::Render(){
 	sdlInit.Render();
 
 //		*** Anything here will be below the player (stepped on) ect.. ***
-	sdlInit.DrawTexture(gridGuide);
-	sdlInit.DrawTexture(steps);
-	sdlInit.DrawTexture(stepsHouse2);
-	sdlInit.DrawTexture(news);
-	sdlInit.DrawTexture(house);
-	sdlInit.DrawTexture(hedgeTopLeft);
-	sdlInit.DrawTexture(hedgeTopLeftSide);
-	sdlInit.DrawTexture(hedgeTopRight);
-	sdlInit.DrawTexture(hedgeTopRightSide);
-	sdlInit.DrawTexture(hedgeBottomLeft);
-	sdlInit.DrawTexture(hedgeBottomLeftSide);
-	sdlInit.DrawTexture(hedgeBottomRight);
-	sdlInit.DrawTexture(hedgeBottomRightSide);
-	sdlInit.DrawTexture(black);
-
+	//sdlInit.DrawSprite(gridGuide);
+	sdlInit.DrawSprite(steps);
+	sdlInit.DrawSprite(stepsHouse2);
+	sdlInit.DrawSprite(news);
+	sdlInit.DrawSprite(hedgeTopLeft);
+	sdlInit.DrawSprite(hedgeTopLeftSide);
+	sdlInit.DrawSprite(hedgeTopRight);
+	sdlInit.DrawSprite(hedgeTopRightSide);
+	sdlInit.DrawSprite(hedgeBottomLeft);
+	sdlInit.DrawSprite(hedgeBottomLeftSide);
+	sdlInit.DrawSprite(hedgeBottomRight);
+	sdlInit.DrawSprite(hedgeBottomRightSide);
+	sdlInit.DrawSprite(black);
+	sdlInit.DrawSprite(buildingInside);
 //      *** Player drawn at this point ***
-	sdlInit.DrawTexture(player);
+	sdlInit.DrawSprite(player);
 
 //      *** Anything after here will appear in front of the player ***
-	sdlInit.DrawTexture(statueBird);
-	sdlInit.DrawTexture(tree);
-	sdlInit.DrawTexture(tree2);
-	sdlInit.DrawTexture(house2);
+	sdlInit.DrawSprite(statueBird);
+	sdlInit.DrawSprite(tree);
+	sdlInit.DrawSprite(tree2);
+	sdlInit.DrawSprite(house2);
+	sdlInit.DrawSprite(house);
+	
 
-	
-	
-	
+	if (SHOW_COLLIDERS) {
+		//sdlInit.DrawSprite(gridGuide);
+		sdlInit.DrawEntityCollider(steps);
+		sdlInit.DrawEntityCollider(stepsHouse2);
+		sdlInit.DrawEntityCollider(news);
+		sdlInit.DrawEntityCollider(house);
+		sdlInit.DrawEntityCollider(hedgeTopLeft);
+		sdlInit.DrawEntityCollider(hedgeTopLeftSide);
+		sdlInit.DrawEntityCollider(hedgeTopRight);
+		sdlInit.DrawEntityCollider(hedgeTopRightSide);
+		sdlInit.DrawEntityCollider(hedgeBottomLeft);
+		sdlInit.DrawEntityCollider(hedgeBottomLeftSide);
+		sdlInit.DrawEntityCollider(hedgeBottomRight);
+		sdlInit.DrawEntityCollider(hedgeBottomRightSide);
+		sdlInit.DrawEntityCollider(black);
+		sdlInit.DrawEntityCollider(player);
+		sdlInit.DrawEntityCollider(statueBird);
+		sdlInit.DrawEntityCollider(tree);
+		sdlInit.DrawEntityCollider(tree2);
+		sdlInit.DrawEntityCollider(house2);
+		sdlInit.DrawEntityCollider(blocker);
+		sdlInit.DrawEntityCollider(blocker2);
+	}
 }

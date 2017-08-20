@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Camera.h"
 #include <iostream>
 
 #define ANIM_RIGHT_COUNT 2
@@ -8,19 +9,24 @@
 
 #define ANIM_ATTACK_COUNT 3
 
+//1.4142f = sqrt(sqr(1) + sqr(1))
+#define SQRHYPE 1.4142f	
+
+
 extern float gDeltaTime;
+extern Camera gCamera;
 
 //Keys held down...
 extern int gHorizKeysHeld;	//keys a and b
 extern int gVertKeysHeld;	//keys w and s
 
-//Keys pressed...
+							//Keys pressed...
 extern bool gFirstKeyDown;	//keys 1
 extern bool gSecondKeyDown;	//keys 2
 extern bool gThirdKeyDown;	//keys 3
 extern bool gFourthKeyDown;	//keys 4
 
-//Keys released...
+							//Keys released...
 extern bool gFirstKeyUp;	//keys e
 extern bool gSecondKeyUp;	//keys 2
 extern bool gThirdKeyUp;	//keys 3
@@ -29,11 +35,6 @@ extern bool gFourthKeyUp;	//keys 4
 namespace {
 	int lastMoveIndex = 4;
 	int lastAttackIndex = 0;
-
-	float oldX = 0;
-	float oldY = 0;
-
-
 }
 
 namespace {
@@ -53,12 +54,12 @@ namespace {
 	float animAttackSpeed = 12;
 
 	//Animation indices...
-	int animRightIndices[ANIM_RIGHT_COUNT] = { 4, 18};
+	int animRightIndices[ANIM_RIGHT_COUNT] = { 4, 18 };
 	int animLeftIndices[ANIM_LEFT_COUNT] = { 2, 16 };
 	int animUpIndices[ANIM_UP_COUNT] = { 3, 17 };
 	int animDownIndices[ANIM_DOWN_COUNT] = { 1, 15 };
 
-	int animDirAttackIndices[4][ANIM_ATTACK_COUNT] = {
+	int animAttackLeftIndices[4][ANIM_ATTACK_COUNT] = {
 		{ 35, 49, 62 },	//right attack...
 		{ 61, 48, 34 },	//left attack...
 		{ 61, 48, 34 },	//down attack...
@@ -66,26 +67,41 @@ namespace {
 	};
 }
 
+void Player::Update() {
+	if (gCamera.IsPanning()) {
+		return;
+	}
+
+	Move();
+
+	if (objectCollided) {
+		if (objectCanTeleport) {
+			std::cout << "Collided" << std::endl;
+			mPos.x = 1500;
+			mPos.y = 1000;
+			objectCollided = !objectCollided;
+		}
+	}
+
+	Attack();
+	Sprite::Update();
+}
+
 void Player::Move() {
 	//If we are attacking we want to stop movement...
 	if (attackTimer > 0.f) {
 		return;
 	}
-
 	//Setting velocity...
 	float velocity = mMoveSpeed * gDeltaTime;
 
-	//Update position...	//TODO: Should create velocity vector and normalize...
-	mXPos += gHorizKeysHeld * velocity;
-	mYPos += gVertKeysHeld * velocity;
+	//Updates position. SQRHYPE is used so diagnal direction is NOT faster...
+	mPos.x += (gVertKeysHeld != 0 ? (gHorizKeysHeld *
+		SQRHYPE) / 2.0f : gHorizKeysHeld) * velocity;
+	mPos.y += (gHorizKeysHeld != 0 ? (gVertKeysHeld *
+		SQRHYPE) / 2.0f : gVertKeysHeld) * velocity;
 
-	//Tells you the position of the character in the console
-	if (oldX != mXPos || oldY != mYPos) {
-		std::cout << mXPos << " " << mYPos << std::endl;
-		oldX = mXPos;
-		oldY = mYPos;
-	}
-
+	std::cout << mPos.x << " " << mPos.y << std::endl;
 
 	//Update animations...
 	if (gHorizKeysHeld > 0) {
@@ -133,10 +149,10 @@ void Player::Attack() {
 	//Update animation...
 	if (attackTimer > 0.f) {
 		attackTimer -= gDeltaTime;	//Updates timer...
-		float time = 1.f - (attackTimer/attackTime);
+		float time = 1.f - (attackTimer / attackTime);
 
 		int index = (int)(time * ANIM_ATTACK_COUNT) % ANIM_ATTACK_COUNT;
-		mSpriteClipIndex = animDirAttackIndices[lastAttackIndex][index];
+		mSpriteClipIndex = animAttackLeftIndices[lastAttackIndex][index];
 
 	}	//Start animation...
 	else if (gFirstKeyDown) {
