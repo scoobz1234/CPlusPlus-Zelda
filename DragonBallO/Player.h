@@ -13,4 +13,7 @@ public:
 public:
 	void Move();
 	void Attack();
+	void SetCamPan();
+	void TeleportIn();
+	void TeleportOut();
 };

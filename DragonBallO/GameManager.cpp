@@ -5,8 +5,8 @@
 #include "Entity.h"
 #include <iostream>
 
-#define PAN_CAMERA_INSTEAD false
-#define SHOW_COLLIDERS true
+//#define PAN_CAMERA_INSTEAD true
+//#define SHOW_COLLIDERS true
 
 //camera dimensions
 const int SCREEN_WIDTH = 640;
@@ -15,8 +15,12 @@ const int SCREEN_HEIGHT = 480;
 const int WORLD_WIDTH = 2400;
 const int WORLD_HEIGHT = 2400;
 
+bool PAN_CAMERA{true};
+bool SHOW_COLLIDERS{ true };
+
 extern SDL_Window* gWindow;
 extern SDL_Renderer* gRenderer;
+
 
 
 Camera gCamera;
@@ -33,6 +37,7 @@ namespace {
 	Sprite blocker;
 	Sprite blocker2;
 	Sprite black;
+	Sprite black2;
 	Sprite steps;
 	Sprite stepsHouse2;
 	Sprite hedgeTopLeft;
@@ -63,6 +68,7 @@ void InitEntities() {
 	blocker.SetTexturePath("textures/Hedge_Top_Left.png");
 	blocker2.SetTexturePath("textures/Hedge_Top_Left.png");
 	black.SetTexturePath("textures/Door_Black.png");
+	black2.SetTexturePath("textures/Door_Black.png");
 	hedgeTopLeft.SetTexturePath("textures/Hedge_Top.png");
 	hedgeTopLeftSide.SetTexturePath("textures/Hedge_Top_left.png");
 	hedgeTopRight.SetTexturePath("textures/Hedge_Top.png");
@@ -86,6 +92,7 @@ void InitEntities() {
 	sdlInit.LoadTexture(blocker);
 	sdlInit.LoadTexture(blocker2);
 	sdlInit.LoadTexture(black);
+	sdlInit.LoadTexture(black2);
 	sdlInit.LoadTexture(hedgeTopLeft);
 	sdlInit.LoadTexture(hedgeTopLeftSide);
 	sdlInit.LoadTexture(hedgeTopRight);
@@ -99,7 +106,7 @@ void InitEntities() {
 	sdlInit.LoadTexture(buildingInside);
 
 	//Setting position information...
-	player.SetPosition(500,400);
+	player.SetPosition(0,0);
 	tree.SetPosition(318, 120);
 	tree2.SetPosition(538, 120);
 	house.SetPosition(400, 100);
@@ -107,6 +114,7 @@ void InitEntities() {
 	blocker.SetPosition(401, 345);
 	blocker2.SetPosition(470, 345);
 	black.SetPosition(430,338);
+	black2.SetPosition(1600, 1112);
 	steps.SetPosition(440, 200);
 	stepsHouse2.SetPosition(440,391);
 	hedgeTopLeft.SetPosition(60, 50);
@@ -132,6 +140,7 @@ void InitEntities() {
 	blocker.SetSpriteSize(47,56);
 	blocker2.SetSpriteSize(50,56);
 	black.SetSpriteSize(50, 50);
+	black2.SetSpriteSize(50, 50);
 	hedgeTopLeft.SetSpriteSize(65, 25);
 	hedgeTopLeftSide.SetSpriteSize(20, 75);
 	hedgeTopRight.SetSpriteSize(65, 25);
@@ -193,6 +202,7 @@ void InitEntities() {
 	statueBird.ConfigureCollision(false, false, {0,25}, {0,0});
 	news.ConfigureCollision(false, false);
 	black.ConfigureCollision(false,true, {0,0}, {0,40});
+	black2.ConfigureCollision(false, true, { 0,0 }, { 0,40 });
 	buildingInside.ConfigureCollision(false, false);
 
 
@@ -214,7 +224,8 @@ void InitEntities() {
 	player.AddCollidableEntity(hedgeTopRightSide);
 	player.AddCollidableEntity(statueBird);
 	player.AddCollidableEntity(black);
-	player.AddCollidableEntity(buildingInside);
+	player.AddCollidableEntity(black2);
+	//player.AddCollidableEntity(buildingInside);
 	
 }
 
@@ -236,6 +247,7 @@ void GameManager::Cleanup(){
 	sdlInit.CleanupSprite(blocker);
 	sdlInit.CleanupSprite(blocker2);
 	sdlInit.CleanupSprite(black);
+	sdlInit.CleanupSprite(black2);
 	sdlInit.CleanupSprite(steps);
 	sdlInit.CleanupSprite(stepsHouse2);
 	sdlInit.CleanupSprite(hedgeTopLeft);
@@ -274,7 +286,7 @@ void GameManager::Update() {
 	player.Update();
 
 
-	if (PAN_CAMERA_INSTEAD) {
+	if (PAN_CAMERA) {
 		gCamera.PanWith(player);
 	}
 	else {
@@ -301,6 +313,7 @@ void GameManager::Render(){
 	sdlInit.DrawSprite(hedgeBottomRight);
 	sdlInit.DrawSprite(hedgeBottomRightSide);
 	sdlInit.DrawSprite(black);
+	sdlInit.DrawSprite(black2);
 	sdlInit.DrawSprite(buildingInside);
 //      *** Player drawn at this point ***
 	sdlInit.DrawSprite(player);
@@ -328,6 +341,7 @@ void GameManager::Render(){
 		sdlInit.DrawEntityCollider(hedgeBottomRight);
 		sdlInit.DrawEntityCollider(hedgeBottomRightSide);
 		sdlInit.DrawEntityCollider(black);
+		sdlInit.DrawEntityCollider(black2);
 		sdlInit.DrawEntityCollider(player);
 		sdlInit.DrawEntityCollider(statueBird);
 		sdlInit.DrawEntityCollider(tree);

@@ -3,6 +3,8 @@
 #include "MyMath.h"
 #include "Entity.h"
 
+
+
 //Screen dimension constants
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;

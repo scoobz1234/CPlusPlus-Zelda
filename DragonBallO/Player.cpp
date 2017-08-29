@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Camera.h"
 #include <iostream>
+#include <windows.h>
 
 #define ANIM_RIGHT_COUNT 2
 #define ANIM_LEFT_COUNT 2
@@ -12,6 +13,7 @@
 //1.4142f = sqrt(sqr(1) + sqr(1))
 #define SQRHYPE 1.4142f	
 
+bool insideHouse = false;
 
 extern float gDeltaTime;
 extern Camera gCamera;
@@ -31,6 +33,8 @@ extern bool gFirstKeyUp;	//keys e
 extern bool gSecondKeyUp;	//keys 2
 extern bool gThirdKeyUp;	//keys 3
 extern bool gFourthKeyUp;	//keys 4
+
+extern bool PAN_CAMERA;
 
 namespace {
 	int lastMoveIndex = 4;
@@ -76,10 +80,14 @@ void Player::Update() {
 
 	if (objectCollided) {
 		if (objectCanTeleport) {
-			std::cout << "Collided" << std::endl;
-			mPos.x = 1500;
-			mPos.y = 1000;
-			objectCollided = !objectCollided;
+			if (!insideHouse) {
+				TeleportIn();
+				insideHouse = !insideHouse;
+			}
+			else {
+				TeleportOut();
+				insideHouse = !insideHouse;
+			}
 		}
 	}
 
@@ -92,6 +100,7 @@ void Player::Move() {
 	if (attackTimer > 0.f) {
 		return;
 	}
+
 	//Setting velocity...
 	float velocity = mMoveSpeed * gDeltaTime;
 
@@ -101,7 +110,7 @@ void Player::Move() {
 	mPos.y += (gHorizKeysHeld != 0 ? (gVertKeysHeld *
 		SQRHYPE) / 2.0f : gVertKeysHeld) * velocity;
 
-	std::cout << mPos.x << " " << mPos.y << std::endl;
+	//std::cout << mPos.x << " " << mPos.y << std::endl;
 
 	//Update animations...
 	if (gHorizKeysHeld > 0) {
@@ -158,4 +167,20 @@ void Player::Attack() {
 	else if (gFirstKeyDown) {
 		attackTimer = attackTime;
 	}
+}
+
+void Player::TeleportIn() {
+	PAN_CAMERA = false;
+	mPos.x = 1534;
+	mPos.y = 1112;
+	objectCollided = !objectCollided;
+}
+
+void Player::TeleportOut() {
+	int tPosx = 440;
+	int tPosy = 391;
+	mPos.x = tPosx;
+	mPos.y = tPosy;
+	objectCollided = !objectCollided;
+	
 }
