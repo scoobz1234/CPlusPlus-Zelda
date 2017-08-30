@@ -20,25 +20,26 @@ class Camera
 	using Float2 = MyMath::Float2;
 
 public:
-	Camera() {};
+	enum Mode {FOLLOW, PAN};
+
+	Camera(Mode mode) : mMode{ mode } {};
 	~Camera() {};
 
 	void SetPos(Float2 pos);
 	void LookAt(Entity &target);
-	void PanWith(Entity &target);
 
 	void RestrictTargetToWorld(Entity &target);
 
 	bool IsPanning();
-
-private:
-	void RestrictCameraToWorld();
+	void SetMode(Mode mode);
 
 private:
 	Float2 mPos;
 	Float2 mStartPanPos;
 	Float2 mEndPanPos;
 
+	Mode mMode{ Mode::FOLLOW };
+	Entity *mLookAtTarget = nullptr;
 	SDL_Rect *mBounds = nullptr;
 };
 

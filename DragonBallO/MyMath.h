@@ -14,6 +14,12 @@ namespace MyMath {
 		float x{ 0.f };
 		float y{ 0.f };
 	};
+	struct RectBoundary {
+		float left{0};
+		float right{0};
+		float top{0};
+		float bottom{0};
+	};
 
 	int Abs(int num);
 	float Abs(float num);

@@ -5,8 +5,8 @@
 #include "Entity.h"
 #include <iostream>
 
-//#define PAN_CAMERA_INSTEAD true
-//#define SHOW_COLLIDERS true
+#define CAMERA_MODE Camera::Mode::PAN
+#define SHOW_COLLIDERS true
 
 //camera dimensions
 const int SCREEN_WIDTH = 640;
@@ -15,20 +15,20 @@ const int SCREEN_HEIGHT = 480;
 const int WORLD_WIDTH = 2400;
 const int WORLD_HEIGHT = 2400;
 
-bool PAN_CAMERA{true};
-bool SHOW_COLLIDERS{ true };
+const int NUM_GRID_ROWS = WORLD_HEIGHT / SCREEN_HEIGHT;
+const int NUM_GRID_COLUMNS = WORLD_WIDTH / SCREEN_WIDTH;
+
+
 
 extern SDL_Window* gWindow;
 extern SDL_Renderer* gRenderer;
 
+Camera gCamera(CAMERA_MODE);
 
-
-Camera gCamera;
 
 static SDLInit sdlInit;
 
 namespace {
-	Camera camera;
 	Player player;
 	Sprite tree;
 	Sprite tree2;
@@ -51,7 +51,47 @@ namespace {
 	Sprite statueBird;
 	Sprite news;
 	Sprite buildingInside;
+	
+	using RectBoundary = MyMath::RectBoundary;
+	RectBoundary worldGrid[NUM_GRID_ROWS][NUM_GRID_COLUMNS];
+	
+	//TODO: Create world map...
+	void InitWorldGrid(MyMath::RectBoundary overlap){
+		float overlapW = overlap.right - overlap.left;
+		float overlapH = overlap.top - overlap.bottom;
 
+
+
+		for (int rowIndx = 0; rowIndx < NUM_GRID_ROWS; ++rowIndx) {
+			for (int colIndx = 0; colIndx < NUM_GRID_COLUMNS; ++colIndx) {
+				RectBoundary &nextScrn = worldGrid[rowIndx][colIndx];
+				//RectBoundary &prevScrn = (rowIndx -1 < 0 || colIndx -1 <0) ? nextScrn : worldGrid[rowIndx - 1][colIndx - 1];
+
+
+				if (rowIndx == 0) {
+					nextScrn.left = 0;
+					nextScrn.right = SCREEN_WIDTH;
+				}
+				if (colIndx == 0) {
+					nextScrn.top = 0;
+					nextScrn.bottom = SCREEN_HEIGHT;
+				}
+
+				//rowIndx at 0 
+				nextScrn.left = 0;
+				nextScrn.right = SCREEN_WIDTH;
+				nextScrn.top = 0;
+				nextScrn.bottom = SCREEN_HEIGHT;
+
+				//rowIndx at 1
+				nextScrn.left = prevScrn.right - overlapW;
+				nextScrn.right = nextScrn.left + SCREEN_WIDTH;
+				nextScrn.top = prevScrn.bottom - overlapH;
+				nextScrn.bottom = nextScrn.top + SCREEN_HEIGHT;
+
+			}
+		}
+	}
 
 }
 
@@ -112,7 +152,7 @@ void InitEntities() {
 	house.SetPosition(400, 100);
 	house2.SetPosition(400, 300);
 	blocker.SetPosition(401, 345);
-	blocker2.SetPosition(470, 345);
+	blocker2.SetPosition(472, 345);
 	black.SetPosition(430,338);
 	black2.SetPosition(1600, 1112);
 	steps.SetPosition(440, 200);
@@ -137,8 +177,8 @@ void InitEntities() {
 	house2.SetSpriteSize(120,100);
 	steps.SetSpriteSize(40, 30);
 	stepsHouse2.SetSpriteSize(40, 30);
-	blocker.SetSpriteSize(47,56);
-	blocker2.SetSpriteSize(50,56);
+	blocker.SetSpriteSize(46,56);
+	blocker2.SetSpriteSize(48,56);
 	black.SetSpriteSize(50, 50);
 	black2.SetSpriteSize(50, 50);
 	hedgeTopLeft.SetSpriteSize(65, 25);
@@ -267,33 +307,16 @@ void GameManager::Cleanup(){
 
 //TODO: Add deltatime later...
 void GameManager::Update() {
-	tree.Update();
-	tree2.Update();
-	house.Update();
-	house2.Update();
-	blocker.Update();
-	blocker2.Update();
-	hedgeTopLeft.Update();
-	hedgeTopLeftSide.Update();
-	hedgeTopRight.Update();
-	hedgeTopRightSide.Update();
-	hedgeBottomLeft.Update();
-	hedgeBottomLeftSide.Update();
-	hedgeBottomRight.Update();
-	hedgeBottomRightSide.Update();
-	statueBird.Update();
-	buildingInside.Update();
 	player.Update();
 
-
-	if (PAN_CAMERA) {
-		gCamera.PanWith(player);
-	}
-	else {
-		gCamera.LookAt(player);
-	}
-
+	// camera looks at the player
+	gCamera.LookAt(player);
+	
 	sdlInit.Update();
+
+	// set the camera back to pan.... (hacky)
+	gCamera.SetMode(Camera::Mode::PAN);
+
 }
 
 void GameManager::Render(){
@@ -317,7 +340,6 @@ void GameManager::Render(){
 	sdlInit.DrawSprite(buildingInside);
 //      *** Player drawn at this point ***
 	sdlInit.DrawSprite(player);
-
 //      *** Anything after here will appear in front of the player ***
 	sdlInit.DrawSprite(statueBird);
 	sdlInit.DrawSprite(tree);

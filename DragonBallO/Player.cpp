@@ -2,6 +2,8 @@
 #include "Camera.h"
 #include <iostream>
 #include <windows.h>
+#include "MyMath.h"
+#include "Entity.h"
 
 #define ANIM_RIGHT_COUNT 2
 #define ANIM_LEFT_COUNT 2
@@ -12,6 +14,9 @@
 
 //1.4142f = sqrt(sqr(1) + sqr(1))
 #define SQRHYPE 1.4142f	
+
+// turn this on if you want to print your players position to the console.
+bool needCoords = true;
 
 bool insideHouse = false;
 
@@ -34,7 +39,6 @@ extern bool gSecondKeyUp;	//keys 2
 extern bool gThirdKeyUp;	//keys 3
 extern bool gFourthKeyUp;	//keys 4
 
-extern bool PAN_CAMERA;
 
 namespace {
 	int lastMoveIndex = 4;
@@ -70,7 +74,8 @@ namespace {
 		{ 61, 48, 34 }	//up attack...
 	};
 }
-
+float oldX;
+float oldY;
 void Player::Update() {
 	if (gCamera.IsPanning()) {
 		return;
@@ -93,6 +98,16 @@ void Player::Update() {
 
 	Attack();
 	Sprite::Update();
+	
+	if (needCoords == true)	{
+
+	if(oldX != mPos.x || oldY != mPos.y){
+		std::cout << mPos.x << " " << mPos.y << std::endl;
+		oldX = mPos.x;
+		oldY = mPos.y;
+	}
+	}
+
 }
 
 void Player::Move() {
@@ -170,17 +185,20 @@ void Player::Attack() {
 }
 
 void Player::TeleportIn() {
-	PAN_CAMERA = false;
+	gCamera.SetMode(Camera::Mode::FOLLOW);
 	mPos.x = 1534;
 	mPos.y = 1112;
 	objectCollided = !objectCollided;
+
 }
 
 void Player::TeleportOut() {
-	int tPosx = 440;
-	int tPosy = 391;
+	gCamera.SetMode(Camera::Mode::FOLLOW);
+	int tPosx = 446.669525;
+	int tPosy = 366.995636;
 	mPos.x = tPosx;
 	mPos.y = tPosy;
 	objectCollided = !objectCollided;
 	
 }
+

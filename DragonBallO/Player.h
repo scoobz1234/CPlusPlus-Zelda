@@ -2,6 +2,7 @@
 #include "Sprite.h"
 #include "Destructible.h"
 
+
 class Player : public Sprite, public Destructible {
 public:
 	//Base class destructor is ALWAYS implicitly called...
@@ -13,7 +14,7 @@ public:
 public:
 	void Move();
 	void Attack();
-	void SetCamPan();
 	void TeleportIn();
 	void TeleportOut();
+
 };
