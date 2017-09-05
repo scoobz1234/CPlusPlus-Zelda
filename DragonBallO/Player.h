@@ -14,7 +14,5 @@ public:
 public:
 	void Move();
 	void Attack();
-	void TeleportIn();
-	void TeleportOut();
 
 };

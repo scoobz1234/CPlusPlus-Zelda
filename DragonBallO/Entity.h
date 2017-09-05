@@ -9,6 +9,7 @@ class Entity {
 	friend class SDLInit;
 	friend class Camera;
 
+public:
 	using UInt = unsigned int;
 	using Int2 = MyMath::Int2;
 	using Float2 = MyMath::Float2;
@@ -20,23 +21,21 @@ public:
 
 public:
 	virtual void Update();
-	virtual void OnCollision(Entity *other);
 
-	void SetPosition(float x, float y);
+	void SetPosition(Float2 pos);
+	void SetSize(int width, int height);
 	void SetMoveSpeed(float moveSpeed);
 
-	void ConfigureCollision(bool canBePushedBack,bool canTeleport, Int2 topLeftCollOffset = { 0, 0 },
-		Int2 bottomRightCollOffset = { 0, 0 });
+	void ConfigureCollision(bool canPushBack, bool canBePushedBack,
+		Int2 topLeftCollOffset = { 0, 0 }, Int2 bottomRightCollOffset = { 0, 0 });
 
 	void AddCollidableEntity(Entity &entity);
-
-	bool objectCollided{ false };
-	bool objectCanTeleport{ false };
 
 private:
 	void CheckCollision();
 
-	UByte mBlockedSides{ 0 };
+protected:
+	virtual void OnCollision(Entity *other);
 
 protected:
 	Float2 mPos;
@@ -45,12 +44,14 @@ protected:
 	Int2 mTopLeftCollOffset;
 	Int2 mBottomRightCollOffset;
 
+	UByte mPushbackSides{ 0 };
+
 	//If this entity can move, it needs a move speed...
 	float mMoveSpeed{ 140.f };
 
 	//For collision...
 	std::vector<Entity*> mCollidableEntities;
+	bool mCanPushBack{ false };
 	bool mCanBePushedBack{ false };
 	int mHasCollided{ false };
-	bool mCanTeleport{ false };
 };

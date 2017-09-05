@@ -1,16 +1,12 @@
 #pragma once
 
 #include "MyMath.h"
+#include "World.h"
 #include "Entity.h"
-
-
 
 //Screen dimension constants
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
-
-extern const int WORLD_WIDTH;
-extern const int WORLD_HEIGHT;
 
 class Camera
 {
@@ -20,7 +16,7 @@ class Camera
 	using Float2 = MyMath::Float2;
 
 public:
-	enum Mode {FOLLOW, PAN};
+	enum Mode { FOLLOW, PAN };
 
 	Camera(Mode mode) : mMode{ mode } {};
 	~Camera() {};
@@ -31,12 +27,10 @@ public:
 	void RestrictTargetToWorld(Entity &target);
 
 	bool IsPanning();
-	void SetMode(Mode mode);
+	Float2 mPos;
 
 private:
-	Float2 mPos;
-	Float2 mStartPanPos;
-	Float2 mEndPanPos;
+	//Float2 mPos;
 
 	Mode mMode{ Mode::FOLLOW };
 	Entity *mLookAtTarget = nullptr;

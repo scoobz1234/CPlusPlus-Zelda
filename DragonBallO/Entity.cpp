@@ -10,18 +10,22 @@ void Entity::Update() {
 	gCamera.RestrictTargetToWorld(*this);
 }
 
-void Entity::SetPosition(float x, float y) {
-	mPos = { x, y };
+void Entity::SetPosition(Float2 pos) {
+	mPos = pos;
+}
+
+void Entity::SetSize(int width, int height) {
+	mSize = { width, height };
 }
 
 void Entity::SetMoveSpeed(float moveSpeed) {
 	mMoveSpeed = moveSpeed;
 }
 
-void Entity::ConfigureCollision(bool canBePushedBack,bool canTeleport, Int2 topLeftCollOffset,
-	Int2 bottomRightCollOffset) {
+void Entity::ConfigureCollision(bool canPushBack, bool canBePushedBack,
+	Int2 topLeftCollOffset, Int2 bottomRightCollOffset) {
+	mCanPushBack = canPushBack;
 	mCanBePushedBack = canBePushedBack;
-	mCanTeleport = canTeleport;
 
 	if (topLeftCollOffset.x + bottomRightCollOffset.x > mSize.x) {
 		printf("Warning: Entity horizontal collision offset set too large. "
@@ -81,9 +85,9 @@ void Entity::CheckCollision() {
 			other->OnCollision(this);
 			OnCollision(other);
 
-			if (other->mCanBePushedBack) {
+			if (mCanPushBack && other->mCanBePushedBack) {
 				if (rightDist > leftDist && rightDist > bottomDist && rightDist > topDist) {
-					if (other->mBlockedSides & 1 << 0) {
+					if (other->mPushbackSides & 1 << 0) {
 						mPos.x += collisionWidth - rightDist;
 					}
 					else {
@@ -91,7 +95,7 @@ void Entity::CheckCollision() {
 					}
 				}
 				else if (topDist > bottomDist && topDist > leftDist) {
-					if (other->mBlockedSides & 1 << 1) {
+					if (other->mPushbackSides & 1 << 1) {
 						mPos.y += topDist - collisionHeight;
 					}
 					else {
@@ -99,7 +103,7 @@ void Entity::CheckCollision() {
 					}
 				}
 				else if (leftDist > bottomDist) {
-					if (other->mBlockedSides & 1 << 2) {
+					if (other->mPushbackSides & 1 << 2) {
 						mPos.x += leftDist - collisionWidth;
 					}
 					else {
@@ -107,7 +111,7 @@ void Entity::CheckCollision() {
 					}
 				}
 				else {
-					if (other->mBlockedSides & 1 << 3) {
+					if (other->mPushbackSides & 1 << 3) {
 						mPos.y += collisionHeight - bottomDist;
 					}
 					else {
@@ -115,7 +119,7 @@ void Entity::CheckCollision() {
 					}
 				}
 			}
-			else if (mCanBePushedBack) {
+			else if (mCanBePushedBack && other->mCanPushBack) {
 				if (rightDist > leftDist && rightDist > bottomDist && rightDist > topDist) {
 					mPos.x += collisionWidth - rightDist;
 				}
@@ -135,12 +139,4 @@ void Entity::CheckCollision() {
 
 void Entity::OnCollision(Entity *other) {
 	mHasCollided = true;
-	objectCollided = true;
-	if (other->mCanTeleport) {
-		objectCanTeleport = true;
-	}
-	else {
-		objectCanTeleport = false;
-	}
-
 }

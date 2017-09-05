@@ -3,9 +3,9 @@
 
 #define MILLI_PER_SEC 1000.f
 
-#define BG_R 0x68
-#define BG_G 0xB1
-#define BG_B 0x38
+#define BG_R 0x4b
+#define BG_G 0x9a
+#define BG_B 0x49
 #define BG_A 0xFF
 
 extern Camera gCamera;
@@ -237,12 +237,34 @@ void SDLInit::DrawSprite(Sprite &sprite) {
 		sprite.GetSpriteClip(), &renderRect);
 }
 
+void SDLInit::DrawHud(Sprite &sprite) {
+	//Set rendering space and render to screen
+	SDL_Rect renderRect = {
+		int(sprite.mPos.x),
+		int(sprite.mPos.y),
+		sprite.mSize.x, sprite.mSize.y
+	};
+
+	auto *anchorOffset = sprite.GetAnchorOffset();
+
+	//If the sprite size changes, the sprite will move. This offset
+	//	is for anchoring the sprite, so that it doesn't move.
+	if (anchorOffset != NULL) {
+		renderRect.x += anchorOffset->x;
+		renderRect.y += anchorOffset->y;
+	}
+
+	//Render to screen
+	SDL_RenderCopy(gRenderer, sprite.mTexture,
+		sprite.GetSpriteClip(), &renderRect);
+}
+
 void SDLInit::DrawEntityCollider(Entity &entity) {
 	if (entity.mHasCollided) {
 		SDL_SetRenderDrawColor(gRenderer, 255, 0, 32, 48);
 		//TODO: Not the best place to put this, but works...
 		entity.mHasCollided = false;
-		entity.mBlockedSides = 0;
+		entity.mPushbackSides = 0;
 	}
 	else {
 		SDL_SetRenderDrawColor(gRenderer, 32, 0, 255, 48);
