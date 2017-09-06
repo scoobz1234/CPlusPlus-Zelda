@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "Camera.h"
 #include "MoveTrigger.h"
-#include "AIHandler.h"
+#include "AISprite.h"
 
 #define CAMERA_MODE Camera::Mode::PAN
 #define SHOW_COLLIDERS false
@@ -19,6 +19,7 @@ extern SDL_Renderer* gRenderer;
 Camera gCamera(CAMERA_MODE);
 World gWorld;
 
+
 static SDLInit sdlInit;
 
 namespace {
@@ -32,7 +33,7 @@ namespace {
 	Sprite blockerHouseBorder3;
 	Sprite blockerHouseBorder4;
 	Sprite blockerHouseBorder5;
-	Sprite blockerHouseborder6;
+	Sprite blockerHouseBorder6;
 	Sprite house2BlackDoor;
 	Sprite buildingInsideBlackDoor;
 	Sprite hedgeTopLeft;
@@ -58,12 +59,17 @@ namespace {
 	Sprite lifeText;
 	Sprite itemBox;
 	Sprite hudItems;
-	//AI
-	AIHandler witch;
-	AIHandler guyInBed;
+	//AI //TODO: Make AISprite classes...
+	AISprite witch;
+	AISprite guyInBed;
+	AISprite sawGuys;
 	//triggers
 	MoveTrigger houseToInside;
 	MoveTrigger houseToOutside;
+}
+// indices for AIsprites...
+namespace {
+	int witchSwapIndices[] = { 1,2,3,4,5,6,7,5 };
 }
 
 void InitEntities() {
@@ -83,9 +89,11 @@ void InitEntities() {
 	hedgeBottomRight.SetTexturePath("textures/Hedge_Top.png");
 	hedgeBottomRightSide.SetTexturePath("textures/Hedge_Top_left.png");
 	buildingInside.SetTexturePath("textures/inside_bld.png");
+	horizLongbush.SetTexturePath("textures/horizLongBush.png");
+	//AI
 	guyInBed.SetTexturePath("textures/guyInBed.png");
 	witch.SetTexturePath("textures/witch.png");
-	horizLongbush.SetTexturePath("textures/horizLongBush.png");
+	sawGuys.SetTexturePath("textures/sawGuys.png");
 	//houses
 	redHouse1.SetTexturePath("textures/Red_Roof_House.png");
 	redHouse2.SetTexturePath("textures/Skull_House.png");
@@ -115,9 +123,11 @@ void InitEntities() {
 	sdlInit.LoadTexture(hedgeBottomRightSide);
 	sdlInit.LoadTexture(statueBird);
 	sdlInit.LoadTexture(buildingInside);
+	sdlInit.LoadTexture(horizLongbush);
+	//AI
 	sdlInit.LoadTexture(guyInBed);
 	sdlInit.LoadTexture(witch);
-	sdlInit.LoadTexture(horizLongbush);
+	sdlInit.LoadTexture(sawGuys);
 	//houses
 	sdlInit.LoadTexture(redHouse1);
 	sdlInit.LoadTexture(redHouse2);
@@ -163,6 +173,7 @@ void InitEntities() {
 	//AI
 	guyInBed.SetPosition({ 1392,1016 });
 	witch.SetPosition({575,133});
+	sawGuys.SetPosition({ 250,250 });
 	//Blockers (borders)...
 	blocker.SetPosition({ 475, 292 });
 	blocker2.SetPosition({ 546, 292 });
@@ -171,7 +182,8 @@ void InitEntities() {
 	blockerHouseBorder3.SetPosition({1210,1016});
 	blockerHouseBorder4.SetPosition({1668,1016});
 	blockerHouseBorder5.SetPosition({1555,1225});
-	blockerHouseborder6.SetPosition({1512,1300});
+	blockerHouseBorder6.SetPosition({1512,1300});
+	
 	//Teleports ...
 	houseToInside.SetPosition({ 510,284 });
 	houseToOutside.SetPosition({ 1510,1280 });
@@ -208,6 +220,7 @@ void InitEntities() {
 	//AI
 	guyInBed.SetSize(48,60);
 	witch.SetSize(25, 35);
+	sawGuys.SetSize(79,28);
 	//Triggers...
 	houseToInside.SetSize(50, 22);
 	houseToOutside.SetSize(50, 20);
@@ -219,7 +232,7 @@ void InitEntities() {
 	blockerHouseBorder3.SetSize(182,209);
 	blockerHouseBorder4.SetSize(182,209);
 	blockerHouseBorder5.SetSize(302,136);
-	blockerHouseborder6.SetSize(43, 60);
+	blockerHouseBorder6.SetSize(43, 60);
 
 
 	//***INIT SPRITESHEETS***
@@ -244,14 +257,19 @@ void InitEntities() {
 	guyInBed.SetSpriteClip(32, 1, 32, 40, 2);
 	//witch
 	witch.InitSpriteSheet(0, 8, 1);
-	witch.SetSpriteClip(0, 0, 24, 35, 1);
-	witch.SetSpriteClip(25, 0, 24, 35, 2);
-	witch.SetSpriteClip(50, 0, 24, 35, 3);
-	witch.SetSpriteClip(75, 0, 24, 35, 4);
-	witch.SetSpriteClip(100, 0, 24, 35, 5);
-	witch.SetSpriteClip(125, 0, 24, 35, 6);
-	witch.SetSpriteClip(150, 0, 24, 35, 7);
-	witch.SetSpriteClip(175, 0, 24, 35, 8);
+	witch.SetSpriteClip(0, 0, 24, 35, 0);
+	witch.SetSpriteClip(25, 0, 24, 35, 1);
+	witch.SetSpriteClip(50, 0, 24, 35, 2);
+	witch.SetSpriteClip(75, 0, 24, 35, 3);
+	witch.SetSpriteClip(100, 0, 24, 35, 4);
+	witch.SetSpriteClip(125, 0, 24, 35, 5);
+	witch.SetSpriteClip(150, 0, 24, 35, 6);
+	witch.SetSpriteClip(175, 0, 24, 35, 7);
+	//sawGuys
+	sawGuys.InitSpriteSheet(0, 3, 1);
+	sawGuys.SetSpriteClip(0,0,79,28,1);
+	sawGuys.SetSpriteClip(80,0,79,28,2);
+	sawGuys.SetSpriteClip(160,0,79,28,3);
 	//hud magic meter
 	//magicMeter.InitSpriteSheet(0, 5, 1);
 	//magicMeter.SetSpriteClip(0, 0, 16, 42, 1);
@@ -299,11 +317,18 @@ void InitEntities() {
 	blockerHouseBorder3.ConfigureCollision(true, false);
 	blockerHouseBorder4.ConfigureCollision(true, false);
 	blockerHouseBorder5.ConfigureCollision(true, false);
-	blockerHouseborder6.ConfigureCollision(true, false);
+	blockerHouseBorder6.ConfigureCollision(true, false);
 	//AI
 	guyInBed.ConfigureCollision(true, false);
 	witch.ConfigureCollision(true, false);
+	sawGuys.ConfigureCollision(true, false);
 
+	//***SETNUMINDICES ***
+		// (count,animspeed,indices)	
+
+	
+	witch.SetAnimSwapIndices(8, 1.0f , witchSwapIndices);
+	
 
 	//***ENABLE COLLISION ***
 	player.AddCollidableEntity(tree);
@@ -332,9 +357,10 @@ void InitEntities() {
 	player.AddCollidableEntity(blockerHouseBorder3);
 	player.AddCollidableEntity(blockerHouseBorder4);
 	player.AddCollidableEntity(blockerHouseBorder5);
-	player.AddCollidableEntity(blockerHouseborder6);
+	player.AddCollidableEntity(blockerHouseBorder6);
 	player.AddCollidableEntity(guyInBed);
 	player.AddCollidableEntity(witch);
+	player.AddCollidableEntity(sawGuys);
 	player.AddCollidableEntity(horizLongbush);
 
 //INIT the world, wont work without this garble...
@@ -382,9 +408,10 @@ void GameManager::Cleanup(){
 	sdlInit.CleanupSprite(blockerHouseBorder3);
 	sdlInit.CleanupSprite(blockerHouseBorder4);
 	sdlInit.CleanupSprite(blockerHouseBorder5);
-	sdlInit.CleanupSprite(blockerHouseborder6);
+	sdlInit.CleanupSprite(blockerHouseBorder6);
 	sdlInit.CleanupSprite(guyInBed);
 	sdlInit.CleanupSprite(witch);
+	sdlInit.CleanupSprite(sawGuys);
 	sdlInit.CleanupSprite(magicMeter);
 	sdlInit.CleanupSprite(lifeText);
 	sdlInit.CleanupSprite(itemBox);
@@ -398,7 +425,6 @@ void GameManager::Cleanup(){
 //TODO: Add deltatime later...
 void GameManager::Update() {
 	player.Update();
-	guyInBed.Update();
 	witch.Update();
 
 	// camera looks at the player
@@ -423,7 +449,7 @@ void GameManager::Render(){
 	sdlInit.DrawSprite(horizLongbush);
 	sdlInit.DrawSprite(house2BlackDoor);
 	sdlInit.DrawSprite(buildingInsideBlackDoor);
-	sdlInit.DrawSprite(guyInBed);
+	//sdlInit.DrawSprite(guyInBed);
 	
 //      *** Player drawn at this point ***
 	sdlInit.DrawSprite(player);
@@ -436,6 +462,7 @@ void GameManager::Render(){
 	sdlInit.DrawSprite(blueHouse2);
 	sdlInit.DrawSprite(blueHouse3);
 	sdlInit.DrawSprite(witch);
+	//sdlInit.DrawSprite(sawGuys);
 	sdlInit.DrawSprite(buildingInside);
 	sdlInit.DrawHud(magicMeter);
 	sdlInit.DrawHud(lifeText);
@@ -469,7 +496,7 @@ void GameManager::Render(){
 	    sdlInit.DrawEntityCollider(blockerHouseBorder3);
 		sdlInit.DrawEntityCollider(blockerHouseBorder4);
 		sdlInit.DrawEntityCollider(blockerHouseBorder5);
-		sdlInit.DrawEntityCollider(blockerHouseborder6);
+		sdlInit.DrawEntityCollider(blockerHouseBorder6);
 		sdlInit.DrawEntityCollider(guyInBed);
 	}
 }

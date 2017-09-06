@@ -70,7 +70,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AIHandler.cpp" />
+    <ClCompile Include="AISprite.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Destructible.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -84,7 +84,7 @@
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AIHandler.h" />
+    <ClInclude Include="AISprite.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Destructible.h" />
     <ClInclude Include="Entity.h" />

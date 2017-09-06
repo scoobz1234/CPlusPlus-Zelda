@@ -81,3 +81,4 @@ is for anchoring the sprite, so that it doesn't move.
 Int2* Sprite::GetAnchorOffset() {
 	return mAnimAnchorOffsets + mSpriteClipIndex;
 }
+
