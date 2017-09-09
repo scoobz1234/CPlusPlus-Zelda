@@ -51,6 +51,12 @@
     <ClCompile Include="AISprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Weather.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDLInit.h">
@@ -87,6 +93,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AISprite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Weather.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

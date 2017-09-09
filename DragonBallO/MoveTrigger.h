@@ -9,7 +9,9 @@ public:
 	MoveTrigger() {};
 	~MoveTrigger() {};
 	using Float2 = MyMath::Float2;
-	void SetMovePos(Float2 movePos);
+	bool mInOrOut{ false };
+	void SetMovePos(Float2 movePos,bool inOrOut);
+
 
 protected:
 	Float2 mMovePos{ 0, 0 };

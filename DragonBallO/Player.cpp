@@ -20,7 +20,7 @@ extern Camera gCamera;
 float oldX;
 float oldY;
 // turn this on if you want to print your players position to the console.
-bool needCoords = true;
+bool needCoords = false;
 
 //Keys held down...
 extern int gHorizKeysHeld;	//keys a and b
@@ -37,7 +37,6 @@ extern bool gFirstKeyUp;	//keys e
 extern bool gSecondKeyUp;	//keys 2
 extern bool gThirdKeyUp;	//keys 3
 extern bool gFourthKeyUp;	//keys 4
-
 
 namespace {
 	int lastMoveIndex = 4;

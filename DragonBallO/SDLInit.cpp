@@ -1,5 +1,6 @@
 #include "SDLInit.h"
 #include "Camera.h"
+#include <iostream>
 
 #define MILLI_PER_SEC 1000.f
 
@@ -14,6 +15,11 @@ extern Camera gCamera;
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
 
+//Music and Sound loading...
+Mix_Music *villageMusic = Mix_LoadMUS("music/village.it");
+Mix_Chunk *swordSound = Mix_LoadWAV("music/golden_sword.it");    //why the hell will you not work!!!
+
+
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
 
@@ -26,21 +32,25 @@ float gDeltaTime = 0.f;
 //Checked in main...
 bool gQuitGame = false;
 
-//Keys held down...
-int gHorizKeysHeld = 0;	//keys a and d
-int gVertKeysHeld = 0;	//keys w and s
+								//Keys held down...
+int gHorizKeysHeld = 0;			//keys a and d
+int gVertKeysHeld = 0;			//keys w and s
 
-						//Keys pressed...
+								//Keys pressed...
 bool gFirstKeyDown = false;		//keys 1
 bool gSecondKeyDown = false;	//keys 2
 bool gThirdKeyDown = false;		//keys 3
 bool gFourthKeyDown = false;	//keys 4
+bool gIKeyDown = false;			//keys I
 
 								//Keys released...
 bool gFirstKeyUp = false;		//keys 1
-bool gSecondKeyUp = false;	//keys 2
+bool gSecondKeyUp = false;		//keys 2
 bool gThirdKeyUp = false;		//keys 3
-bool gFourthKeyUp = false;	//keys 4
+bool gFourthKeyUp = false;		//keys 4
+bool gIKeyUp = false;			//keys I
+
+
 
 namespace {
 	SDL_Event event;
@@ -52,13 +62,14 @@ void HandleKeyboardEvents() {
 	gSecondKeyDown = false;
 	gThirdKeyDown = false;
 	gFourthKeyDown = false;
-
+	//gIKeyDown = false;
+	
 	//Reset released keys here...
 	gFirstKeyUp = false;
 	gSecondKeyUp = false;
 	gThirdKeyUp = false;
 	gFourthKeyUp = false;
-
+	//gIKeyUp = false;
 	/* Poll for events */
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
@@ -69,14 +80,35 @@ void HandleKeyboardEvents() {
 				switch (event.key.keysym.sym) {
 					//Keys held down...
 				case SDLK_w: gVertKeysHeld -= 1; break;		//up...
+				case SDLK_UP: gVertKeysHeld -= 1; break;    //up....
 				case SDLK_s: gVertKeysHeld += 1; break;		//down...
+				case SDLK_DOWN: gVertKeysHeld += 1; break;  //down...
 				case SDLK_a: gHorizKeysHeld -= 1; break;	//left...
+				case SDLK_LEFT: gHorizKeysHeld -= 1; break; //left...
 				case SDLK_d: gHorizKeysHeld += 1; break;	//right...
-															//Keys pressed...
-				case SDLK_e: gFirstKeyDown = true; break;
+				case SDLK_RIGHT: gHorizKeysHeld += 1; break; //right...
+				case SDLK_e: 
+					Mix_PlayChannel(-1, swordSound, 0);
+					if (Mix_PlayChannel(-1, swordSound, 0) == -1) {
+					printf("Mix_PlayChannel: %s\n", Mix_GetError());
+					// may be critical error, or maybe just no channels were free.
+					// you could allocated another channel in that case...
+				} gFirstKeyDown = true; break;
 				case SDLK_2: gSecondKeyDown = true; break;
 				case SDLK_3: gThirdKeyDown = true; break;
 				case SDLK_4: gFourthKeyDown = true; break;
+				case SDLK_i: gIKeyDown = !gIKeyDown; break;
+				case SDLK_m: 
+					if (!Mix_PlayingMusic())
+						Mix_PlayMusic(villageMusic, -1);
+					else if (Mix_PausedMusic())
+						Mix_ResumeMusic();
+					else
+						Mix_PauseMusic();
+					break;
+				case SDLK_n:
+					Mix_HaltMusic();
+					break;
 				default: break;
 				}
 			}
@@ -87,14 +119,19 @@ void HandleKeyboardEvents() {
 				switch (event.key.keysym.sym) {
 					//Keys held down...
 				case SDLK_w: gVertKeysHeld += 1; break;		//up...
+				case SDLK_UP: gVertKeysHeld += 1; break;    //up....
 				case SDLK_s: gVertKeysHeld -= 1; break;		//down...
+				case SDLK_DOWN: gVertKeysHeld -= 1; break;  //down...
 				case SDLK_a: gHorizKeysHeld += 1; break;	//left...
+				case SDLK_LEFT: gHorizKeysHeld += 1; break; //left...
 				case SDLK_d: gHorizKeysHeld -= 1; break;	//right...
+				case SDLK_RIGHT: gHorizKeysHeld -= 1; break; //right
 															//Keys released...
 				case SDLK_e: gFirstKeyUp = true; break;
 				case SDLK_2: gSecondKeyUp = true; break;
 				case SDLK_3: gThirdKeyUp = true; break;
 				case SDLK_4: gFourthKeyUp = true; break;
+				//case SDLK_i: gIKeyUp = true; break;
 				default: break;
 				}
 			}
@@ -116,7 +153,7 @@ bool SDLInit::Setup() {
 	bool success = true;
 
 	//Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
 		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		success = false;
 	}
@@ -151,6 +188,11 @@ bool SDLInit::Setup() {
 					printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
 					success = false;
 				}
+				//Initialize SDL_mixer
+				if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 4, 2048) < 0) {
+					printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+					success = false;
+				}
 				else {
 					SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 				}
@@ -160,6 +202,7 @@ bool SDLInit::Setup() {
 
 	return success;
 }
+
 
 void SDLInit::LoadTexture(Sprite &sprite) {
 	//This is how we get our file name...
@@ -259,6 +302,28 @@ void SDLInit::DrawHud(Sprite &sprite) {
 		sprite.GetSpriteClip(), &renderRect);
 }
 
+void SDLInit::DrawWeather(Sprite &sprite) {
+	//Set rendering space and render to screen
+	SDL_Rect renderRect = {
+		int(sprite.mPos.x),
+		int(sprite.mPos.y),
+		sprite.mSize.x, sprite.mSize.y
+	};
+
+	auto *anchorOffset = sprite.GetAnchorOffset();
+
+	//If the sprite size changes, the sprite will move. This offset
+	//	is for anchoring the sprite, so that it doesn't move.
+	if (anchorOffset != NULL) {
+		renderRect.x += anchorOffset->x;
+		renderRect.y += anchorOffset->y;
+	}
+
+	//Render to screen
+	SDL_RenderCopy(gRenderer, sprite.mTexture,
+		sprite.GetSpriteClip(), &renderRect);
+}
+
 void SDLInit::DrawEntityCollider(Entity &entity) {
 	if (entity.mHasCollided) {
 		SDL_SetRenderDrawColor(gRenderer, 255, 0, 32, 48);
@@ -306,11 +371,15 @@ void SDLInit::Update() {
 void SDLInit::Cleanup() {
 	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow(gWindow);
+	Mix_FreeMusic(villageMusic);
+	Mix_FreeChunk(swordSound);
 
 	gWindow = NULL;
 	gRenderer = NULL;
-
+	villageMusic = nullptr;
+	swordSound = nullptr;
 	//Quit SDL subsystems
+	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }

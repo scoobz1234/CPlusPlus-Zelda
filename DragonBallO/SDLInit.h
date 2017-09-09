@@ -1,9 +1,9 @@
 //Using SDL and standard IO
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 #include <stdio.h>
 #include <string>
-
 #include "Sprite.h"
 
 class SDLInit {
@@ -19,6 +19,7 @@ public:
 
 	void DrawSprite(Sprite &sprite);
 	void DrawHud(Sprite &sprite);
+	void DrawWeather(Sprite &sprite);
 	void DrawEntityCollider(Entity &entity);
 
 	void Render();
@@ -26,6 +27,7 @@ public:
 
 	void CleanupSprite(Sprite &sprite);
 	void Cleanup();
+
 
 private:
 	SDL_Rect *mDstRect = NULL;

@@ -14,5 +14,6 @@ public:
 public:
 	void Move();
 	void Attack();
+	void Music();
 
 };

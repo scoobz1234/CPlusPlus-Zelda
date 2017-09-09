@@ -3,28 +3,27 @@
 #include "Destructible.h"
 
 
-class AISprite : public Sprite, public Destructible {
+class AISprite : public Sprite {
 public:
 	//Base class destructor is ALWAYS implicitly called...
-	AISprite() { mCanBePushedBack = false; }
-	virtual ~AISprite() override {}
-
-	void Update() override;
+	AISprite() {}
+	void Update();
 
 public:
-	/*void MoveRightAnim();
-	void MoveLeftAnim();
-	void MoveUpAnim();
-	void MoveDownAnim();*/
+
 	void StaticSpriteSwapping();
-
+	//index sizes...
+	int numSwapIndices{ 0 };
+	//indices...
+	int *swapIndices = nullptr;
+	//timer for the sprite swap...
+	float swapTimer{ 0.f };
+	//Animation speeds...
+	float animSwapSpeed{ 0 };
 
 public:
-	void SetAnimRightIndices(int count,float animSpeed, int * indices);
-	void SetAnimLeftIndices(int count, float animSpeed, int * indices);
-	void SetAnimDownIndices(int count, float animSpeed, int * indices);
-	void SetAnimUpIndices(int count, float animSpeed, int * indices);
-	void SetAnimSwapIndices(int count, float animSpeed, int * indices);
+	void SetAnimSwapIndices(int count,float animSpeed,int * indices);
+
 };
 
 

@@ -7,4 +7,7 @@ public:
 
 	void Update();
 	void Render();
+	void animationStates();
+	void weatherStates();
+	void Inventory();
 };

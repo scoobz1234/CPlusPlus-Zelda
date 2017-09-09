@@ -1,3 +1,4 @@
+/*************************************************				INCLUDES			**************************************************/
 #include "GameManager.h"
 #include "SDLInit.h"
 #include "World.h"
@@ -5,383 +6,368 @@
 #include "Camera.h"
 #include "MoveTrigger.h"
 #include "AISprite.h"
-
+#include "Weather.h"
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+/*************************************************			FLAG and ECT			**************************************************/
 #define CAMERA_MODE Camera::Mode::PAN
 #define SHOW_COLLIDERS false
+
+using namespace std;
 
 //camera dimensions
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+//Window Definitions
 extern SDL_Window* gWindow;
 extern SDL_Renderer* gRenderer;
 
+//Camera and World
 Camera gCamera(CAMERA_MODE);
 World gWorld;
 
+//keypresses inventory
+extern bool gIKeyDown;						//bool so we can check if the I key is pressed
+bool invOpen{ false };						//another inventory bool so we can toggle stuff
+
+//weather stuff...
+float weatherTimer = 0.f;					//Timer for the weather generator
+int weatherGenerator{ 0 };					//Weather Generator set to 0 initially
+bool rainOn{ false };						//rain toggle bool set to false
+bool fogOn{ false };						//fog toggle bool set to false
+extern bool inside;							//checks if player is "inside" so we can toggle weather
 
 static SDLInit sdlInit;
-
 namespace {
-	Player player;
-	Sprite tree;
-	Sprite tree2;
-	Sprite blocker;
-	Sprite blocker2;
-	Sprite blockerHouseBorder1;
-	Sprite blockerHouseBorder2;
-	Sprite blockerHouseBorder3;
-	Sprite blockerHouseBorder4;
-	Sprite blockerHouseBorder5;
-	Sprite blockerHouseBorder6;
-	Sprite house2BlackDoor;
-	Sprite buildingInsideBlackDoor;
-	Sprite hedgeTopLeft;
-	Sprite hedgeTopRight;
-	Sprite hedgeTopLeftSide;
-	Sprite hedgeTopRightSide;
-	Sprite hedgeBottomLeft;
-	Sprite hedgeBottomRight;
-	Sprite hedgeBottomLeftSide;
-	Sprite hedgeBottomRightSide;
-	Sprite statueBird;
-	Sprite buildingInside;
-	Sprite horizLongbush;
-	//houses
-	Sprite redHouse1;
-	Sprite redHouse2;
-	Sprite blueHouse2;
-	Sprite blueHouse3;
-	//grounds
-	Sprite ground1;
-	//Hud Items
-	Sprite magicMeter;
-	Sprite lifeText;
-	Sprite itemBox;
-	Sprite hudItems;
-	//AI //TODO: Make AISprite classes...
-	AISprite witch;
-	AISprite guyInBed;
-	AISprite sawGuys;
-	//triggers
-	MoveTrigger houseToInside;
-	MoveTrigger houseToOutside;
+/*************************************************			INTRODUCTIONS			**************************************************/
+	Player player;							//Player
+	Sprite tree;							//Sprite
+	Sprite tree2;							//Sprite
+	Sprite blocker;							//Invisible Blockade Sprite
+	Sprite blocker2;						//Invisible Blockade Sprite
+	Sprite blockerHouseBorder1;				//Invisible Blockade Sprite
+	Sprite blockerHouseBorder2;				//Invisible Blockade Sprite
+	Sprite blockerHouseBorder3;				//Invisible Blockade Sprite
+	Sprite blockerHouseBorder4;				//Invisible Blockade Sprite
+	Sprite blockerHouseBorder5;				//Invisible Blockade Sprite
+	Sprite blockerHouseBorder6;				//Invisible Blockade Sprite
+	Sprite house2BlackDoor;					//Sprite
+	Sprite buildingInsideBlackDoor;			//Sprite
+	Sprite hedgeTopLeft;					//Sprite
+	Sprite hedgeTopRight;					//Sprite
+	Sprite hedgeTopLeftSide;				//Sprite
+	Sprite hedgeTopRightSide;				//Sprite
+	Sprite hedgeBottomLeft;					//Sprite
+	Sprite hedgeBottomRight;				//Sprite
+	Sprite hedgeBottomLeftSide;				//Sprite
+	Sprite hedgeBottomRightSide;			//Sprite
+	Sprite statueBird;						//Sprite
+	Sprite buildingInside;					//Sprite
+	Sprite horizLongbush;					//Sprite
+	Sprite redHouse1;						//House Sprite
+	Sprite redHouse2;						//House Sprite
+	Sprite blueHouse2;						//House Sprite
+	Sprite blueHouse3;						//House Sprite
+	Sprite ground1;							//Ground Sprite
+	Sprite magicMeter;						//HUD Sprite
+	Sprite lifeText;						//HUD Sprite
+	Sprite itemBox;							//HUD Sprite
+	Sprite hudItems;						//HUD Sprite
+	Sprite inventory;						//HUD Sprite
+	AISprite witch;							//AI Sprite
+	AISprite guyInBed;						//AI Sprite
+	AISprite sawGuys;						//AI Sprite
+	MoveTrigger houseToInside;				//Trigger Sprite
+	MoveTrigger houseToOutside;				//Trigger Sprite
+	Weather rain;							//Weather Sprite
+	Weather fog;							//Weather Sprite
+/*************************************************		SET ANIMATION INDICES		**************************************************/
+	int witchSwapIndices[] = { 0,1,2,3,4,5,6,7};
+	int guyInBedIndices[] = {0,1};
+	int rainIndices[] = { 0,1,2,3 };
+	int fogIndices[] = { 0,1,2,3 };
+	int sawGuysIndices[] = {0,1,2};
 }
-// indices for AIsprites...
-namespace {
-	int witchSwapIndices[] = { 1,2,3,4,5,6,7,5 };
-}
-
 void InitEntities() {
-	//***SET TEXTURE PATH***
-	player.SetTexturePath("textures/link_sheet.png");
-	tree.SetTexturePath("textures/tree_green.gif");
-	tree2.SetTexturePath("textures/tree_green.gif");
-	house2BlackDoor.SetTexturePath("textures/Door_Black.png");
-	buildingInsideBlackDoor.SetTexturePath("textures/Door_Black.png");
-	hedgeTopLeft.SetTexturePath("textures/Hedge_Top.png");
-	hedgeTopLeftSide.SetTexturePath("textures/Hedge_Top_left.png");
-	hedgeTopRight.SetTexturePath("textures/Hedge_Top.png");
-	hedgeTopRightSide.SetTexturePath("textures/Hedge_Top_left.png");
-	statueBird.SetTexturePath("textures/Statue_Bird.png");
-	hedgeBottomLeft.SetTexturePath("textures/Hedge_Top.png");
-	hedgeBottomLeftSide.SetTexturePath("textures/Hedge_Top_left.png");
-	hedgeBottomRight.SetTexturePath("textures/Hedge_Top.png");
-	hedgeBottomRightSide.SetTexturePath("textures/Hedge_Top_left.png");
-	buildingInside.SetTexturePath("textures/inside_bld.png");
-	horizLongbush.SetTexturePath("textures/horizLongBush.png");
-	//AI
-	guyInBed.SetTexturePath("textures/guyInBed.png");
-	witch.SetTexturePath("textures/witch.png");
-	sawGuys.SetTexturePath("textures/sawGuys.png");
-	//houses
-	redHouse1.SetTexturePath("textures/Red_Roof_House.png");
-	redHouse2.SetTexturePath("textures/Skull_House.png");
-	blueHouse2.SetTexturePath("textures/blueHouse2.png");
-	blueHouse3.SetTexturePath("textures/blueHouse3.png");
-	//grounds
-	ground1.SetTexturePath("textures/ground1.png");
-	//hud
-	magicMeter.SetTexturePath("textures/tempMeter.png");
-	lifeText.SetTexturePath("textures/lifeTextHud.png");
-	itemBox.SetTexturePath("textures/itemBox.png");
-	hudItems.SetTexturePath("textures/hudItems.png");
-
-	//***LOAD TEXTURES ***
-	sdlInit.LoadTexture(player);
-	sdlInit.LoadTexture(tree);
-	sdlInit.LoadTexture(tree2);
-	sdlInit.LoadTexture(house2BlackDoor);
-	sdlInit.LoadTexture(buildingInsideBlackDoor);
-	sdlInit.LoadTexture(hedgeTopLeft);
-	sdlInit.LoadTexture(hedgeTopLeftSide);
-	sdlInit.LoadTexture(hedgeTopRight);
-	sdlInit.LoadTexture(hedgeTopRightSide);
-	sdlInit.LoadTexture(hedgeBottomLeft);
-	sdlInit.LoadTexture(hedgeBottomLeftSide);
-	sdlInit.LoadTexture(hedgeBottomRight);
-	sdlInit.LoadTexture(hedgeBottomRightSide);
-	sdlInit.LoadTexture(statueBird);
-	sdlInit.LoadTexture(buildingInside);
-	sdlInit.LoadTexture(horizLongbush);
-	//AI
-	sdlInit.LoadTexture(guyInBed);
-	sdlInit.LoadTexture(witch);
-	sdlInit.LoadTexture(sawGuys);
-	//houses
-	sdlInit.LoadTexture(redHouse1);
-	sdlInit.LoadTexture(redHouse2);
-	sdlInit.LoadTexture(blueHouse2);
-	sdlInit.LoadTexture(blueHouse3);
-	//grounds
-	sdlInit.LoadTexture(ground1);
-	//hud
-	sdlInit.LoadTexture(magicMeter);
-	sdlInit.LoadTexture(lifeText);
-	sdlInit.LoadTexture(itemBox);
-	sdlInit.LoadTexture(hudItems);
-	
-	//***SET POSITION***
-	player.SetPosition({ 68,143 });
-	tree.SetPosition({ 360, 20 });
-	tree2.SetPosition({360, 120});
-	house2BlackDoor.SetPosition({ 510,288 });
-	buildingInsideBlackDoor.SetPosition({ 1510,1224 });
-	hedgeTopLeft.SetPosition({ 153, 33 });
-	hedgeTopLeftSide.SetPosition({ 153, 33 });
-	hedgeTopRight.SetPosition({ 235, 33 });
-	hedgeTopRightSide.SetPosition({ 280, 33 });
-	hedgeBottomLeft.SetPosition({ 153, 180 });
-	hedgeBottomLeftSide.SetPosition({ 153, 122 });
-	hedgeBottomRight.SetPosition({ 235, 180 });
-	hedgeBottomRightSide.SetPosition({ 280, 122 });
-	statueBird.SetPosition({ 208, 72 });
-	buildingInside.SetPosition({ 1210,880 });
-	horizLongbush.SetPosition({0,446});
-	//houses
-	redHouse1.SetPosition({ 492, 35 });
-	redHouse2.SetPosition({ 475, 250 });
-	blueHouse2.SetPosition({ 43, 275 });
-	blueHouse3.SetPosition({ 284, 258 });
-	//ground
-	ground1.SetPosition({0,0});
-	//hud
-	magicMeter.SetPosition({20,20});
-	lifeText.SetPosition({500,10});
-	itemBox.SetPosition({50,20});
-	hudItems.SetPosition({110,10});
-	//AI
-	guyInBed.SetPosition({ 1392,1016 });
-	witch.SetPosition({575,133});
-	sawGuys.SetPosition({ 250,250 });
-	//Blockers (borders)...
-	blocker.SetPosition({ 475, 292 });
-	blocker2.SetPosition({ 546, 292 });
-	blockerHouseBorder1.SetPosition({1210,880});
-	blockerHouseBorder2.SetPosition({1210,1225});
-	blockerHouseBorder3.SetPosition({1210,1016});
-	blockerHouseBorder4.SetPosition({1668,1016});
-	blockerHouseBorder5.SetPosition({1555,1225});
-	blockerHouseBorder6.SetPosition({1512,1300});
-	
-	//Teleports ...
-	houseToInside.SetPosition({ 510,284 });
-	houseToOutside.SetPosition({ 1510,1280 });
-
-	//***SET SIZE***
-	player.SetSize(45, 45);
-	tree.SetSize(54, 68);
-	tree2.SetSize(54, 68);
-	house2BlackDoor.SetSize(50, 50);
-	buildingInsideBlackDoor.SetSize(50, 50);
-	hedgeTopLeft.SetSize(60, 20);
-	hedgeTopLeftSide.SetSize(15, 65);
-	hedgeTopRight.SetSize(60, 20);
-	hedgeTopRightSide.SetSize(15, 65);
-	hedgeBottomLeft.SetSize(60, 20);
-	hedgeBottomLeftSide.SetSize(15, 65);
-	hedgeBottomRight.SetSize(60, 20);
-	hedgeBottomRightSide.SetSize(15, 65);
-	statueBird.SetSize(30, 50);
-	buildingInside.SetSize(640,480);
-	horizLongbush.SetSize(216,23);
-	//houses
-	redHouse1.SetSize(120, 100);
-	redHouse2.SetSize(120, 100);
-	blueHouse2.SetSize(120, 100);
-	blueHouse3.SetSize(120, 100);
-	//grounds
-	ground1.SetSize(640,480);
-	//hud
-	magicMeter.SetSize(26,62);
-	lifeText.SetSize(64,17);
-	itemBox.SetSize(32,32);
-	hudItems.SetSize(100,18);
-	//AI
-	guyInBed.SetSize(48,60);
-	witch.SetSize(25, 35);
-	sawGuys.SetSize(79,28);
-	//Triggers...
-	houseToInside.SetSize(50, 22);
-	houseToOutside.SetSize(50, 20);
-	//Invisible Blockers (borders)...
-	blocker.SetSize(48, 56);
-	blocker2.SetSize(48, 56);
-	blockerHouseBorder1.SetSize(640,136);
-	blockerHouseBorder2.SetSize(302,136);
-	blockerHouseBorder3.SetSize(182,209);
-	blockerHouseBorder4.SetSize(182,209);
-	blockerHouseBorder5.SetSize(302,136);
-	blockerHouseBorder6.SetSize(43, 60);
-
-
-	//***INIT SPRITESHEETS***
-	player.InitSpriteSheet(0, 14, 6);
-	player.SetSpriteClip(90, 1, 30, 30, 3);			//up...
-	player.SetSpriteClip(90, 31, 30, 30, 17);		//up move...
-	player.SetSpriteClip(30, 1, 30, 30, 1);			//down...
-	player.SetSpriteClip(30, 31, 30, 30, 15);		//down move...
-	player.SetSpriteClip(120, 1, 30, 30, 4);		//right...
-	player.SetSpriteClip(120, 31, 30, 30, 18);		//right move...
-	player.SetSpriteClip(60, 1, 30, 30, 2);			//left...
-	player.SetSpriteClip(60, 31, 30, 30, 16);		//left move...
-	player.SetSpriteClip(170, 141, 30, 31, 61);		//first left attack...
-	player.SetSpriteClip(173, 109, 30, 30, 48);		//second left attack...
-	player.SetSpriteClip(173, 71, 30, 30, 34);		//last left attack...
-	player.SetSpriteClip(203, 142, 30, 30, 62);		//last right attack...
-	player.SetSpriteClip(203, 109, 30, 30, 49);		//second right attack...
-	player.SetSpriteClip(203, 77, 30, 31, 35);		//first right attack...
-	//guy in bed
-	guyInBed.InitSpriteSheet(0,3,1);
-	guyInBed.SetSpriteClip(0, 1, 32, 40, 1);
-	guyInBed.SetSpriteClip(32, 1, 32, 40, 2);
-	//witch
-	witch.InitSpriteSheet(0, 8, 1);
-	witch.SetSpriteClip(0, 0, 24, 35, 0);
-	witch.SetSpriteClip(25, 0, 24, 35, 1);
-	witch.SetSpriteClip(50, 0, 24, 35, 2);
-	witch.SetSpriteClip(75, 0, 24, 35, 3);
-	witch.SetSpriteClip(100, 0, 24, 35, 4);
-	witch.SetSpriteClip(125, 0, 24, 35, 5);
-	witch.SetSpriteClip(150, 0, 24, 35, 6);
-	witch.SetSpriteClip(175, 0, 24, 35, 7);
-	//sawGuys
-	sawGuys.InitSpriteSheet(0, 3, 1);
-	sawGuys.SetSpriteClip(0,0,79,28,1);
-	sawGuys.SetSpriteClip(80,0,79,28,2);
-	sawGuys.SetSpriteClip(160,0,79,28,3);
-	//hud magic meter
-	//magicMeter.InitSpriteSheet(0, 5, 1);
-	//magicMeter.SetSpriteClip(0, 0, 16, 42, 1);
-	//magicMeter.SetSpriteClip(16, 0, 16, 42, 2);
-	//magicMeter.SetSpriteClip(32, 0, 16, 42, 3);
-	//magicMeter.SetSpriteClip(48, 0, 16, 42, 4);
-	//Set sprite sheet anchor positions...
-	player.SetAnchorOffset({-16, -13}, 61);			//first left attack...
-	player.SetAnchorOffset({-23, -10}, 48);			//second left attack...
-	player.SetAnchorOffset({-26, -5}, 34);			//last left attack...
-	player.SetAnchorOffset({4, 0}, 62);				//last right attack...
-	player.SetAnchorOffset({2, -10}, 49);			//second right attack...
-	player.SetAnchorOffset({-11, -13}, 35);			//first right attack...=>2
-
-	//***COLLISION***
-//		*** (canbepushed,canteleport, {ColliderX,ColliderY},{OriginX,OriginY}) ***
-	player.ConfigureCollision(true,true, {5,10}, {28,15});
-	tree.ConfigureCollision(true,false, {0,15}, {0,0});
-	tree2.ConfigureCollision(true,false,{0, 15}, { 0,0 });
-	hedgeTopLeft.ConfigureCollision(true, false);
-	hedgeTopLeftSide.ConfigureCollision(true, false);
-	hedgeTopRight.ConfigureCollision(true, false);
-	hedgeTopRightSide.ConfigureCollision(true, false);
-	hedgeBottomLeft.ConfigureCollision(true, false);
-	hedgeBottomLeftSide.ConfigureCollision(true, false);
-	hedgeBottomRight.ConfigureCollision(true, false);
-	hedgeBottomRightSide.ConfigureCollision(true, false);
-	horizLongbush.ConfigureCollision(true, false);
-	statueBird.ConfigureCollision(true, false, {0,25}, {0,0});
-	house2BlackDoor.ConfigureCollision(false,false, {0,0}, {0,40});
-	buildingInsideBlackDoor.ConfigureCollision(false, false, { 0,40 }, { 0,0 });
-	buildingInside.ConfigureCollision(true, false);
-	houseToInside.ConfigureCollision(false, false);
-	houseToOutside.ConfigureCollision(false, false);
-	//houses
-	redHouse1.ConfigureCollision(true, false, { 0,8 }, { 0,5 });
-	redHouse2.ConfigureCollision(true, false, { 0,8 }, { 0,55 });
-	blueHouse2.ConfigureCollision(true, false, { 0,8 }, { 0,5 });
-	blueHouse3.ConfigureCollision(true, false, { 0,8 }, { 0,55 });
-	//Blockers
-	blocker.ConfigureCollision(true, false);
-	blocker2.ConfigureCollision(true, false);
-	blockerHouseBorder1.ConfigureCollision(true, false);
-	blockerHouseBorder2.ConfigureCollision(true, false);
-	blockerHouseBorder3.ConfigureCollision(true, false);
-	blockerHouseBorder4.ConfigureCollision(true, false);
-	blockerHouseBorder5.ConfigureCollision(true, false);
-	blockerHouseBorder6.ConfigureCollision(true, false);
-	//AI
-	guyInBed.ConfigureCollision(true, false);
-	witch.ConfigureCollision(true, false);
-	sawGuys.ConfigureCollision(true, false);
-
-	//***SETNUMINDICES ***
-		// (count,animspeed,indices)	
-
-	
-	witch.SetAnimSwapIndices(8, 1.0f , witchSwapIndices);
-	
-
-	//***ENABLE COLLISION ***
-	player.AddCollidableEntity(tree);
-	player.AddCollidableEntity(tree2);
-	player.AddCollidableEntity(redHouse1);
-	player.AddCollidableEntity(redHouse2);
-	player.AddCollidableEntity(blueHouse2);
-	player.AddCollidableEntity(blueHouse3);
-	player.AddCollidableEntity(blocker);
-	player.AddCollidableEntity(blocker2);
-	player.AddCollidableEntity(hedgeTopLeft);
-	player.AddCollidableEntity(hedgeTopLeftSide);
-	player.AddCollidableEntity(hedgeBottomLeft);
-	player.AddCollidableEntity(hedgeBottomLeftSide);
-	player.AddCollidableEntity(hedgeBottomRight);
-	player.AddCollidableEntity(hedgeBottomRightSide);
-	player.AddCollidableEntity(hedgeTopRight);
-	player.AddCollidableEntity(hedgeTopRightSide);
-	player.AddCollidableEntity(statueBird);
-	player.AddCollidableEntity(house2BlackDoor);
-	player.AddCollidableEntity(buildingInsideBlackDoor);
-	player.AddCollidableEntity(houseToInside);
-	player.AddCollidableEntity(houseToOutside);
-	player.AddCollidableEntity(blockerHouseBorder1);
-	player.AddCollidableEntity(blockerHouseBorder2);
-	player.AddCollidableEntity(blockerHouseBorder3);
-	player.AddCollidableEntity(blockerHouseBorder4);
-	player.AddCollidableEntity(blockerHouseBorder5);
-	player.AddCollidableEntity(blockerHouseBorder6);
-	player.AddCollidableEntity(guyInBed);
-	player.AddCollidableEntity(witch);
-	player.AddCollidableEntity(sawGuys);
-	player.AddCollidableEntity(horizLongbush);
-
-//INIT the world, wont work without this garble...
-	gWorld.InitWorldGrid({ 0,70 - 35,14,70 - 16 });
-	
-//***TELEPORT LOCATIONS ***
-	houseToInside.SetMovePos({1520,1214});
-	houseToOutside.SetMovePos({ 523,312 });
-
+/*************************************************			SET TEXTURE PATH		**************************************************/
+	player.SetTexturePath("textures/link_sheet.png");						//Player Texture Path
+	tree.SetTexturePath("textures/tree_green.gif");							//Sprite Texture Path
+	tree2.SetTexturePath("textures/tree_green.gif");						//Sprite Texture Path
+	house2BlackDoor.SetTexturePath("textures/Door_Black.png");				//Sprite Texture Path
+	buildingInsideBlackDoor.SetTexturePath("textures/Door_Black.png");		//Sprite Texture Path
+	hedgeTopLeft.SetTexturePath("textures/Hedge_Top.png");					//Sprite Texture Path
+	hedgeTopLeftSide.SetTexturePath("textures/Hedge_Top_left.png");			//Sprite Texture Path
+	hedgeTopRight.SetTexturePath("textures/Hedge_Top.png");					//Sprite Texture Path
+	hedgeTopRightSide.SetTexturePath("textures/Hedge_Top_left.png");		//Sprite Texture Path
+	statueBird.SetTexturePath("textures/Statue_Bird.png");					//Sprite Texture Path
+	hedgeBottomLeft.SetTexturePath("textures/Hedge_Top.png");				//Sprite Texture Path
+	hedgeBottomLeftSide.SetTexturePath("textures/Hedge_Top_left.png");		//Sprite Texture Path
+	hedgeBottomRight.SetTexturePath("textures/Hedge_Top.png");				//Sprite Texture Path
+	hedgeBottomRightSide.SetTexturePath("textures/Hedge_Top_left.png");		//Sprite Texture Path
+	buildingInside.SetTexturePath("textures/inside_bld.png");				//Sprite Texture Path
+	horizLongbush.SetTexturePath("textures/horizLongBush.png");				//Sprite Texture Path
+	guyInBed.SetTexturePath("textures/guyInBed.png");						//AI Texture Path
+	witch.SetTexturePath("textures/witch.png");								//AI Texture Path
+	sawGuys.SetTexturePath("textures/sawGuys.png");							//AI Texture Path
+	redHouse1.SetTexturePath("textures/Red_Roof_House.png");				//House Texture Path
+	redHouse2.SetTexturePath("textures/Skull_House.png");					//House Texture Path
+	blueHouse2.SetTexturePath("textures/blueHouse2.png");					//House Texture Path
+	blueHouse3.SetTexturePath("textures/blueHouse3.png");					//House Texture Path
+	ground1.SetTexturePath("textures/ground1.png");							//Ground Texture Path
+	magicMeter.SetTexturePath("textures/tempMeter.png");					//Hud Texture Path
+	lifeText.SetTexturePath("textures/lifeTextHud.png");					//Hud Texture Path
+	itemBox.SetTexturePath("textures/itemBox.png");							//Hud Texture Path
+	hudItems.SetTexturePath("textures/hudItems.png");						//Hud Texture Path
+	inventory.SetTexturePath("textures/Inventory.png");						//Hud Texture Path
+	rain.SetTexturePath("textures/rain2.png");								//Weather Texture Path
+	fog.SetTexturePath("textures/fog.png");									//Weather Texture Path
+/*************************************************			LOAD TEXTURES			**************************************************/
+	sdlInit.LoadTexture(player);						//Player Texture Load
+	sdlInit.LoadTexture(tree);							//Sprite Texture Load
+	sdlInit.LoadTexture(tree2);							//Sprite Texture Load
+	sdlInit.LoadTexture(house2BlackDoor);				//Sprite Texture Load
+	sdlInit.LoadTexture(buildingInsideBlackDoor);		//Sprite Texture Load
+	sdlInit.LoadTexture(hedgeTopLeft);					//Sprite Texture Load
+	sdlInit.LoadTexture(hedgeTopLeftSide);				//Sprite Texture Load
+	sdlInit.LoadTexture(hedgeTopRight);					//Sprite Texture Load
+	sdlInit.LoadTexture(hedgeTopRightSide);				//Sprite Texture Load
+	sdlInit.LoadTexture(hedgeBottomLeft);				//Sprite Texture Load
+	sdlInit.LoadTexture(hedgeBottomLeftSide);			//Sprite Texture Load
+	sdlInit.LoadTexture(hedgeBottomRight);				//Sprite Texture Load
+	sdlInit.LoadTexture(hedgeBottomRightSide);			//Sprite Texture Load
+	sdlInit.LoadTexture(statueBird);					//Sprite Texture Load
+	sdlInit.LoadTexture(buildingInside);				//Sprite Texture Load
+	sdlInit.LoadTexture(horizLongbush);					//Sprite Texture Load
+	sdlInit.LoadTexture(guyInBed);						//AI Texture Load
+	sdlInit.LoadTexture(witch);							//AI Texture Load
+	sdlInit.LoadTexture(sawGuys);						//AI Texture Load
+	sdlInit.LoadTexture(redHouse1);						//House Texture Load
+	sdlInit.LoadTexture(redHouse2);						//House Texture Load
+	sdlInit.LoadTexture(blueHouse2);					//House Texture Load
+	sdlInit.LoadTexture(blueHouse3);					//House Texture Load
+	sdlInit.LoadTexture(ground1);						//Ground Texture Load
+	sdlInit.LoadTexture(magicMeter);					//Hud Texture Load
+	sdlInit.LoadTexture(lifeText);						//Hud Texture Load
+	sdlInit.LoadTexture(itemBox);						//Hud Texture Load
+	sdlInit.LoadTexture(hudItems);						//Hud Texture Load
+	sdlInit.LoadTexture(inventory);						//HUD Texture Load
+	sdlInit.LoadTexture(rain);							//Weather Texture Load
+	sdlInit.LoadTexture(fog);							//Weather Texture Load
+/*************************************************			SET POSITION			**************************************************/
+	player.SetPosition({ 68,143 });							//Sprite Position
+	tree.SetPosition({ 360, 20 });							//Sprite Position
+	tree2.SetPosition({360, 120});							//Sprite Position
+	house2BlackDoor.SetPosition({ 510,288 });				//Sprite Position
+	buildingInsideBlackDoor.SetPosition({ 1510,1224 });		//Sprite Position
+	hedgeTopLeft.SetPosition({ 153, 33 });					//Sprite Position
+	hedgeTopLeftSide.SetPosition({ 153, 33 });				//Sprite Position
+	hedgeTopRight.SetPosition({ 235, 33 });					//Sprite Position
+	hedgeTopRightSide.SetPosition({ 280, 33 });				//Sprite Position
+	hedgeBottomLeft.SetPosition({ 153, 180 });				//Sprite Position
+	hedgeBottomLeftSide.SetPosition({ 153, 122 });			//Sprite Position
+	hedgeBottomRight.SetPosition({ 235, 180 });				//Sprite Position
+	hedgeBottomRightSide.SetPosition({ 280, 122 });			//Sprite Position
+	statueBird.SetPosition({ 208, 72 });					//Sprite Position
+	buildingInside.SetPosition({ 1210,880 });				//Sprite Position
+	horizLongbush.SetPosition({0,446});						//Sprite Position
+	redHouse1.SetPosition({ 492, 35 });						//House Position
+	redHouse2.SetPosition({ 475, 250 });					//House Position
+	blueHouse2.SetPosition({ 43, 275 });					//House Position
+	blueHouse3.SetPosition({ 284, 258 });					//House Position
+	ground1.SetPosition({0,0});								//Ground Position
+	magicMeter.SetPosition({20,20});						//Hud Position
+	lifeText.SetPosition({500,10});							//Hud Position
+	itemBox.SetPosition({50,20});							//Hud Position
+	hudItems.SetPosition({110,10});							//Hud Position
+	inventory.SetPosition({ 0,0 });							//Hud Position
+	guyInBed.SetPosition({ 1392,1016 });					//AI Position
+	witch.SetPosition({575,133});							//AI Position
+	sawGuys.SetPosition({ 348,161 });						//AI Position
+	blocker.SetPosition({ 475, 292 });						//Invisible Blockade Position
+	blocker2.SetPosition({ 546, 292 });						//Invisible Blockade Position
+	blockerHouseBorder1.SetPosition({1210,880});			//Invisible Blockade Position
+	blockerHouseBorder2.SetPosition({1210,1225});			//Invisible Blockade Position
+	blockerHouseBorder3.SetPosition({1210,1016});			//Invisible Blockade Position
+	blockerHouseBorder4.SetPosition({1668,1016});			//Invisible Blockade Position
+	blockerHouseBorder5.SetPosition({1555,1225});			//Invisible Blockade Position
+	blockerHouseBorder6.SetPosition({1512,1300});			//Invisible Blockade Position
+	rain.SetPosition({0,0});								//Weather Position
+	fog.SetPosition({0,0});									//Weather Position
+	houseToInside.SetPosition({ 510,284 });					//Teleport Positions
+	houseToOutside.SetPosition({ 1510,1280 });				//Teleport Positions
+/*************************************************			SET SIZE				**************************************************/
+	player.SetSize(45, 45);						//player Size
+	tree.SetSize(54, 68);						//sprite Size
+	tree2.SetSize(54, 68);						//sprite Size
+	house2BlackDoor.SetSize(50, 50);			//sprite Size
+	buildingInsideBlackDoor.SetSize(50, 50);	//sprite Size
+	hedgeTopLeft.SetSize(60, 20);				//sprite Size
+	hedgeTopLeftSide.SetSize(15, 65);			//sprite Size
+	hedgeTopRight.SetSize(60, 20);				//sprite Size
+	hedgeTopRightSide.SetSize(15, 65);			//sprite Size
+	hedgeBottomLeft.SetSize(60, 20);			//sprite Size
+	hedgeBottomLeftSide.SetSize(15, 65);		//sprite Size
+	hedgeBottomRight.SetSize(60, 20);			//sprite Size
+	hedgeBottomRightSide.SetSize(15, 65);		//sprite Size
+	statueBird.SetSize(30, 50);					//sprite Size
+	buildingInside.SetSize(640,480);			//sprite Size
+	horizLongbush.SetSize(216,23);				//sprite Size
+	redHouse1.SetSize(120, 100);				//house sprite Size
+	redHouse2.SetSize(120, 100);				//house sprite Size
+	blueHouse2.SetSize(120, 100);				//house sprite Size
+	blueHouse3.SetSize(120, 100);				//house sprite Size
+	ground1.SetSize(640,480);					//ground texture Size
+	magicMeter.SetSize(26,62);					//hud Size
+	lifeText.SetSize(64,17);					//hud Size
+	itemBox.SetSize(32,32);						//hud Size
+	hudItems.SetSize(100,18);					//hud Size
+	inventory.SetSize(640, 480);				//hud Size
+	guyInBed.SetSize(43,55);					//AI Size
+	witch.SetSize(25, 35);						//AI Size
+	sawGuys.SetSize(79,28);						//AI Size
+	houseToInside.SetSize(50, 22);				//Trigger Size
+	houseToOutside.SetSize(50, 20);				//Trigger Size
+	blocker.SetSize(48, 56);					//invisible blockade Size
+	blocker2.SetSize(48, 56);					//invisible blockade Size
+	blockerHouseBorder1.SetSize(640,136);		//invisible blockade Size
+	blockerHouseBorder2.SetSize(302,136);		//invisible blockade Size
+	blockerHouseBorder3.SetSize(182,209);		//invisible blockade Size
+	blockerHouseBorder4.SetSize(182,209);		//invisible blockade Size
+	blockerHouseBorder5.SetSize(302,136);		//invisible blockade Size
+	blockerHouseBorder6.SetSize(43, 60);		//invisible blockade Size
+	rain.SetSize(640,480);						//weather Size
+	fog.SetSize(640, 480);						//weather Size
+/*************************************************		INITITIALIZE SPRITESHEETS	**************************************************/
+	player.InitSpriteSheet(0, 14, 6);					//Player Initialize SpriteSheet
+	player.SetSpriteClip(90, 1, 30, 30, 3);				//Player Set Sprite Clips			up...
+	player.SetSpriteClip(90, 31, 30, 30, 17);			//Player Set Sprite Clips			up move...
+	player.SetSpriteClip(30, 1, 30, 30, 1);				//Player Set Sprite Clips			down...
+	player.SetSpriteClip(30, 31, 30, 30, 15);			//Player Set Sprite Clips			down move...
+	player.SetSpriteClip(120, 1, 30, 30, 4);			//Player Set Sprite Clips			right...
+	player.SetSpriteClip(120, 31, 30, 30, 18);			//Player Set Sprite Clips			right move...
+	player.SetSpriteClip(60, 1, 30, 30, 2);				//Player Set Sprite Clips			left...
+	player.SetSpriteClip(60, 31, 30, 30, 16);			//Player Set Sprite Clips			left move...
+	player.SetSpriteClip(170, 141, 30, 31, 61);			//Player Set Sprite Clips			first left attack...
+	player.SetSpriteClip(173, 109, 30, 30, 48);			//Player Set Sprite Clips			second left attack...
+	player.SetSpriteClip(173, 71, 30, 30, 34);			//Player Set Sprite Clips			last left attack...
+	player.SetSpriteClip(203, 142, 30, 30, 62);			//Player Set Sprite Clips			last right attack...
+	player.SetSpriteClip(203, 109, 30, 30, 49);			//Player Set Sprite Clips			second right attack...
+	player.SetSpriteClip(203, 77, 30, 31, 35);			//Player Set Sprite Clips			first right attack...
+	player.SetAnchorOffset({ -16, -13 }, 61);			//Player Set Sprite Clips			first left attack...
+	player.SetAnchorOffset({ -23, -10 }, 48);			//Player Set Sprite Clips			second left attack...
+	player.SetAnchorOffset({ -26, -5 }, 34);			//Player Set Sprite Clips			last left attack...
+	player.SetAnchorOffset({ 4, 0 }, 62);				//Player Set Sprite Clips			last right attack...
+	player.SetAnchorOffset({ 2, -10 }, 49);				//Player Set Sprite Clips			second right attack...
+	player.SetAnchorOffset({ -11, -13 }, 35);			//Player Set Sprite Clips			first right attack...=>2
+	guyInBed.InitSpriteSheet(0,3,1);					//AI Initialize SpriteSheet
+	guyInBed.SetSpriteClip(0, 1, 32, 40, 0);			//AI Set Sprite Clip
+	guyInBed.SetSpriteClip(32, 1, 32, 40, 1);			//AI Set Sprite Clip
+	witch.InitSpriteSheet(0, 8, 1);						//AI Initialize SpriteSheet
+	witch.SetSpriteClip(0, 0, 24, 35, 0);				//AI Set Sprite Clip
+	witch.SetSpriteClip(25, 0, 24, 35, 1);				//AI Set Sprite Clip
+	witch.SetSpriteClip(50, 0, 24, 35, 2);				//AI Set Sprite Clip
+	witch.SetSpriteClip(75, 0, 24, 35, 3);				//AI Set Sprite Clip
+	witch.SetSpriteClip(100, 0, 24, 35, 4);				//AI Set Sprite Clip
+	witch.SetSpriteClip(125, 0, 24, 35, 5);				//AI Set Sprite Clip
+	witch.SetSpriteClip(150, 0, 24, 35, 6);				//AI Set Sprite Clip
+	witch.SetSpriteClip(175, 0, 24, 35, 7);				//AI Set Sprite Clip
+	sawGuys.InitSpriteSheet(0, 3, 1);					//AI Initialize SpriteSheet
+	sawGuys.SetSpriteClip(0,0,79,28,0);					//AI Set Sprite Clip
+	sawGuys.SetSpriteClip(80,0,79,28,1);				//AI Set Sprite Clip
+	sawGuys.SetSpriteClip(160,0,79,28,2);				//AI Set Sprite Clip
+	rain.InitSpriteSheet(0, 4, 1);						//Weather Initialize SpriteSheet
+	rain.SetSpriteClip(0, 0, 256, 223, 0);				//Weather Set Sprite Clip
+	rain.SetSpriteClip(257, 0, 256, 223, 1);			//Weather Set Sprite Clip
+	rain.SetSpriteClip(513, 0, 256, 223, 2);			//Weather Set Sprite Clip
+	rain.SetSpriteClip(769, 0, 256, 223, 3);			//Weather Set Sprite Clip
+	fog.InitSpriteSheet(0, 4, 1);						//Weather Initialize SpriteSheet
+	fog.SetSpriteClip(0, 0, 480, 360, 0);				//Weather Set Sprite Clip
+	fog.SetSpriteClip(481, 0, 480, 360, 1);				//Weather Set Sprite Clip
+	fog.SetSpriteClip(961, 0, 480, 360, 2);				//Weather Set Sprite Clip
+	fog.SetSpriteClip(1441, 0, 480, 360, 3);			//Weather Set Sprite Clip
+/*************************************************			SET COLLISION			**************************************************/
+	player.ConfigureCollision(true,true, {5,10}, {28,15});							//Player Collision
+	tree.ConfigureCollision(true,false, {0,15}, {0,0});								//Sprite Collision
+	tree2.ConfigureCollision(true,false,{0, 15}, { 0,0 });							//Sprite Collision
+	hedgeTopLeft.ConfigureCollision(true, false);									//Sprite Collision
+	hedgeTopLeftSide.ConfigureCollision(true, false);								//Sprite Collision
+	hedgeTopRight.ConfigureCollision(true, false);									//Sprite Collision
+	hedgeTopRightSide.ConfigureCollision(true, false);								//Sprite Collision
+	hedgeBottomLeft.ConfigureCollision(true, false);								//Sprite Collision
+	hedgeBottomLeftSide.ConfigureCollision(true, false);							//Sprite Collision
+	hedgeBottomRight.ConfigureCollision(true, false);								//Sprite Collision
+	hedgeBottomRightSide.ConfigureCollision(true, false);							//Sprite Collision
+	horizLongbush.ConfigureCollision(true, false);									//Sprite Collision
+	statueBird.ConfigureCollision(true, false, {0,25}, {0,0});						//Sprite Collision
+	house2BlackDoor.ConfigureCollision(false,false, {0,0}, {0,40});					//Sprite Collision
+	buildingInsideBlackDoor.ConfigureCollision(false, false, { 0,40 }, { 0,0 });	//Sprite Collision
+	buildingInside.ConfigureCollision(true, false);									//Sprite Collision
+	houseToInside.ConfigureCollision(false, false);									//Teleport Collision
+	houseToOutside.ConfigureCollision(false, false);								//Teleport Collision
+	redHouse1.ConfigureCollision(true, false, { 0,8 }, { 0,5 });					//House Collision
+	redHouse2.ConfigureCollision(true, false, { 0,8 }, { 0,55 });					//House Collision
+	blueHouse2.ConfigureCollision(true, false, { 0,8 }, { 0,5 });					//House Collision
+	blueHouse3.ConfigureCollision(true, false, { 0,8 }, { 0,55 });					//House Collision
+	blocker.ConfigureCollision(true, false);										//Invisible Blockade Collision
+	blocker2.ConfigureCollision(true, false);										//Invisible Blockade Collision
+	blockerHouseBorder2.ConfigureCollision(true, false);							//Invisible Blockade Collision
+	blockerHouseBorder1.ConfigureCollision(true, false);							//Invisible Blockade Collision
+	blockerHouseBorder3.ConfigureCollision(true, false);							//Invisible Blockade Collision
+	blockerHouseBorder4.ConfigureCollision(true, false);							//Invisible Blockade Collision
+	blockerHouseBorder5.ConfigureCollision(true, false);							//Invisible Blockade Collision
+	blockerHouseBorder6.ConfigureCollision(true, false);							//Invisible Blockade Collision
+	guyInBed.ConfigureCollision(true, false);										//AI Collision
+	witch.ConfigureCollision(true, false);											//AI Collision
+	sawGuys.ConfigureCollision(true, false);										//AI Collision
+	rain.ConfigureCollision(false, false);											//Weather Collision
+	fog.ConfigureCollision(false, false);											//Weather Collision
+/*************************************************			ENABLE COLLISION		**************************************************/
+	player.AddCollidableEntity(tree);							//Player/Sprite Collision
+	player.AddCollidableEntity(tree2);							//Player/Sprite Collision
+	player.AddCollidableEntity(redHouse1);						//Player/Sprite Collision
+	player.AddCollidableEntity(redHouse2);						//Player/Sprite Collision
+	player.AddCollidableEntity(blueHouse2);						//Player/Sprite Collision
+	player.AddCollidableEntity(blueHouse3);						//Player/Sprite Collision
+	player.AddCollidableEntity(blocker);						//Player/Sprite Collision
+	player.AddCollidableEntity(blocker2);						//Player/Sprite Collision
+	player.AddCollidableEntity(hedgeTopLeft);					//Player/Sprite Collision
+	player.AddCollidableEntity(hedgeTopLeftSide);				//Player/Sprite Collision
+	player.AddCollidableEntity(hedgeBottomLeft);				//Player/Sprite Collision
+	player.AddCollidableEntity(hedgeBottomLeftSide);			//Player/Sprite Collision
+	player.AddCollidableEntity(hedgeBottomRight);				//Player/Sprite Collision
+	player.AddCollidableEntity(hedgeBottomRightSide);			//Player/Sprite Collision
+	player.AddCollidableEntity(hedgeTopRight);					//Player/Sprite Collision
+	player.AddCollidableEntity(hedgeTopRightSide);				//Player/Sprite Collision
+	player.AddCollidableEntity(statueBird);						//Player/Sprite Collision
+	player.AddCollidableEntity(house2BlackDoor);				//Player/Sprite Collision
+	player.AddCollidableEntity(buildingInsideBlackDoor);		//Player/Sprite Collision
+	player.AddCollidableEntity(houseToInside);					//Player/Sprite Collision
+	player.AddCollidableEntity(houseToOutside);					//Player/Sprite Collision
+	player.AddCollidableEntity(blockerHouseBorder1);			//Player/Sprite Collision
+	player.AddCollidableEntity(blockerHouseBorder2);			//Player/Sprite Collision
+	player.AddCollidableEntity(blockerHouseBorder3);			//Player/Sprite Collision
+	player.AddCollidableEntity(blockerHouseBorder4);			//Player/Sprite Collision
+	player.AddCollidableEntity(blockerHouseBorder5);			//Player/Sprite Collision
+	player.AddCollidableEntity(blockerHouseBorder6);			//Player/Sprite Collision
+	player.AddCollidableEntity(guyInBed);						//Player/Sprite Collision
+	player.AddCollidableEntity(witch);							//Player/Sprite Collision
+	player.AddCollidableEntity(sawGuys);						//Player/Sprite Collision
+	player.AddCollidableEntity(horizLongbush);					//Player/Sprite Collision
+/*************************************************		WORLD GRID INITIALIZATION	**************************************************/
+	gWorld.InitWorldGrid({ 0,70 - 35,14,70 - 16 });					//Initialize the World Grid
+/*************************************************			TELEPORT LOCATIONS		**************************************************/
+	houseToInside.SetMovePos({1520,1214},true);				//Telport Into House
+	houseToOutside.SetMovePos({ 523,312 },false);				//Teleport Outside Of House
 }
-
 bool GameManager::Init(){
 	bool initSuccess = sdlInit.Setup();
-	if (initSuccess) {
-		InitEntities();
-	}
-
+	if (initSuccess) { InitEntities(); }
 	return initSuccess;
 }
-
 void GameManager::Cleanup(){
+/*************************************************				CLEANUP				**************************************************/
 	sdlInit.CleanupSprite(player);
 	sdlInit.CleanupSprite(tree);
 	sdlInit.CleanupSprite(tree2);
@@ -418,58 +404,58 @@ void GameManager::Cleanup(){
 	sdlInit.CleanupSprite(hudItems);
 	sdlInit.CleanupSprite(ground1);
 	sdlInit.CleanupSprite(horizLongbush);
+	sdlInit.CleanupSprite(rain);
+	sdlInit.CleanupSprite(fog);
+	sdlInit.CleanupSprite(inventory);
 	sdlInit.Cleanup();
-
 }
-
-//TODO: Add deltatime later...
 void GameManager::Update() {
-	player.Update();
-	witch.Update();
-
-	// camera looks at the player
-	gCamera.LookAt(player);
-	
-	sdlInit.Update();
+/*************************************************				UPDATE				**************************************************/
+	player.Update();									//Players Update Call
+	animationStates();									//AI Animations Call
+	weatherStates();									//Weather States Call
+	Inventory();
+	gCamera.LookAt(player);								//Camera Looks At Player
+	sdlInit.Update();									//SDL Update Call
 }
 
 void GameManager::Render(){
-	sdlInit.Render();
-
-//		*** Anything here will be below the player (stepped on) ect.. ***
-	sdlInit.DrawSprite(ground1);
-	sdlInit.DrawSprite(hedgeTopLeft);
-	sdlInit.DrawSprite(hedgeTopLeftSide);
-	sdlInit.DrawSprite(hedgeTopRight);
-	sdlInit.DrawSprite(hedgeTopRightSide);
-	sdlInit.DrawSprite(hedgeBottomLeftSide);
-	sdlInit.DrawSprite(hedgeBottomRightSide);
-	sdlInit.DrawSprite(hedgeBottomLeft);
-	sdlInit.DrawSprite(hedgeBottomRight);
-	sdlInit.DrawSprite(horizLongbush);
-	sdlInit.DrawSprite(house2BlackDoor);
-	sdlInit.DrawSprite(buildingInsideBlackDoor);
-	//sdlInit.DrawSprite(guyInBed);
-	
-//      *** Player drawn at this point ***
-	sdlInit.DrawSprite(player);
-//      *** Anything after here will appear in front of the player ***
-	sdlInit.DrawSprite(statueBird);
-	sdlInit.DrawSprite(tree);
-	sdlInit.DrawSprite(tree2);
-	sdlInit.DrawSprite(redHouse2);
-	sdlInit.DrawSprite(redHouse1);
-	sdlInit.DrawSprite(blueHouse2);
-	sdlInit.DrawSprite(blueHouse3);
-	sdlInit.DrawSprite(witch);
-	//sdlInit.DrawSprite(sawGuys);
-	sdlInit.DrawSprite(buildingInside);
-	sdlInit.DrawHud(magicMeter);
-	sdlInit.DrawHud(lifeText);
-	sdlInit.DrawHud(itemBox);
-	sdlInit.DrawHud(hudItems);
-	
-
+/*************************************************				RENDERING			**************************************************/
+	sdlInit.Render();									//Render SDL
+	sdlInit.DrawSprite(ground1);						//Render Sprite Under Player
+	sdlInit.DrawSprite(hedgeTopLeft);					//Render Sprite Under Player
+	sdlInit.DrawSprite(hedgeTopLeftSide);				//Render Sprite Under Player
+	sdlInit.DrawSprite(hedgeTopRight);					//Render Sprite Under Player
+	sdlInit.DrawSprite(hedgeTopRightSide);				//Render Sprite Under Player
+	sdlInit.DrawSprite(hedgeBottomLeftSide);			//Render Sprite Under Player
+	sdlInit.DrawSprite(hedgeBottomRightSide);			//Render Sprite Under Player
+	sdlInit.DrawSprite(hedgeBottomLeft);				//Render Sprite Under Player
+	sdlInit.DrawSprite(hedgeBottomRight);				//Render Sprite Under Player
+	sdlInit.DrawSprite(horizLongbush);					//Render Sprite Under Player
+	sdlInit.DrawSprite(house2BlackDoor);				//Render Sprite Under Player
+	sdlInit.DrawSprite(buildingInsideBlackDoor);		//Render Sprite Under Player
+	sdlInit.DrawSprite(guyInBed);						//Render Sprite Under Player
+	sdlInit.DrawSprite(player);							//Render Sprite ***PLAYER***
+	sdlInit.DrawSprite(statueBird);						//Render Sprite Above Player
+	sdlInit.DrawSprite(tree);							//Render Sprite Above Player
+	sdlInit.DrawSprite(tree2);							//Render Sprite Above Player
+	sdlInit.DrawSprite(redHouse2);						//Render Sprite Above Player
+	sdlInit.DrawSprite(redHouse1);						//Render Sprite Above Player
+	sdlInit.DrawSprite(blueHouse2);						//Render Sprite Above Player
+	sdlInit.DrawSprite(blueHouse3);						//Render Sprite Above Player
+	sdlInit.DrawSprite(witch);							//Render Sprite Above Player
+	sdlInit.DrawSprite(sawGuys);						//Render Sprite Above Player
+	sdlInit.DrawSprite(buildingInside);					//Render Sprite Above Player
+	if (!inside) {
+		if (rainOn) { sdlInit.DrawHud(rain); }			//Render Weather Under HUD
+		if (fogOn) { sdlInit.DrawHud(fog); }}			//Render Weather Under HUD
+	if (!invOpen) {
+		sdlInit.DrawHud(magicMeter);					//Render HUD
+		sdlInit.DrawHud(lifeText);						//Render HUD
+		sdlInit.DrawHud(itemBox);						//Render HUD
+		sdlInit.DrawHud(hudItems);}						//Render HUD
+	if (invOpen) { sdlInit.DrawHud(inventory); }		//Render Inventory
+/*************************************************		RENDERING COLLIDERS			**************************************************/
 	if (SHOW_COLLIDERS) {
 		sdlInit.DrawEntityCollider(redHouse1);
 		sdlInit.DrawEntityCollider(hedgeTopLeft);
@@ -499,4 +485,58 @@ void GameManager::Render(){
 		sdlInit.DrawEntityCollider(blockerHouseBorder6);
 		sdlInit.DrawEntityCollider(guyInBed);
 	}
+}
+void GameManager::animationStates() {
+	witch.SetAnimSwapIndices(8, 6.0f, witchSwapIndices);
+	witch.Update();
+	sawGuys.SetAnimSwapIndices(3, .8f, sawGuysIndices);
+	sawGuys.Update();
+	guyInBed.SetAnimSwapIndices(2, .2f, guyInBedIndices);
+	guyInBed.Update();
+}
+void GameManager::weatherStates() {
+	weatherTimer--;														//Timer De-crements every tick
+
+	if (weatherTimer <= 0) {
+		srand(time(NULL));												//Primes random # Generator
+		weatherGenerator = rand() % 30 + 1;								//Generators Random Number between 1-30
+	
+		if (weatherGenerator >=0 && weatherGenerator <10) {	
+			rainOn = false;												//if clear weather 0-10 rain false
+			fogOn = false;												//if clear weather 0-10 fog false
+			weatherTimer = 80000.f;										//if clear weather 0-10 reset timer
+			return;
+		}
+		else if (weatherGenerator >= 10 && weatherGenerator <20) {
+			fogOn = false;												//if rainy weather 10-20 fog false
+			rainOn = true;												//if rainy weather 10-20 rain on
+			weatherTimer = 30000.f;										//if rainy weather 10-20 reset timer
+		}
+		else if (weatherGenerator >=20) {
+			rainOn = false;												//if foggy weather 20-30 rain false
+			fogOn = true;												//if foggy weather 20-30 fog false
+			weatherTimer = 20000.f;										//if foggy weather 20-30 reset timer
+		}
+	}
+
+	if (rainOn) {
+		rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
+		rain.Update();													//if rainy weather update it!
+	}
+	else if (fogOn) {
+		fog.SetAnimSwapIndices(4, .3f, fogIndices);						//if foggy weather set the params for the class
+		fog.Update();													//if foggy weather update it!
+	}
+	else {
+		return;															//else return...
+	}
+}
+void GameManager::Inventory() {
+	if (gIKeyDown) {
+		invOpen = true;
+	}
+	else if (!gIKeyDown) {
+		invOpen = false;
+	}
+
 }

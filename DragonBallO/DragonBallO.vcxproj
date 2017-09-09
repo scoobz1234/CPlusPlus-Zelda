@@ -40,8 +40,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)SDL2_image-2.0.1\include;$(SolutionDir)SDL2-2.0.5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)SDL2_image-2.0.1\lib\x86;$(SolutionDir)SDL2-2.0.5\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)SDL2_image-2.0.1\include;$(SolutionDir)SDL2-2.0.5\include;$(SolutionDir)SDL2_mixer-2.0.1\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)SDL2_image-2.0.1\lib\x86;$(SolutionDir)SDL2-2.0.5\lib\x86;$(SolutionDir)SDL2_mixer-2.0.1\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -51,7 +51,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -80,7 +80,9 @@
     <ClCompile Include="MyMath.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SDLInit.cpp" />
+    <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="Weather.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -93,8 +95,10 @@
     <ClInclude Include="MyMath.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="SDLInit.h" />
+    <ClInclude Include="Sound.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Trigger.h" />
+    <ClInclude Include="Weather.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
