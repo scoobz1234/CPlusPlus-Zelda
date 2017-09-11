@@ -309,7 +309,7 @@ void InitEntities() {
 	redHouse1.ConfigureCollision(true, false, { 0,8 }, { 0,5 });					//House Collision
 	redHouse2.ConfigureCollision(true, false, { 0,8 }, { 0,55 });					//House Collision
 	blueHouse2.ConfigureCollision(true, false, { 0,8 }, { 0,5 });					//House Collision
-	blueHouse3.ConfigureCollision(true, false, { 0,8 }, { 0,55 });					//House Collision
+	blueHouse3.ConfigureCollision(true, false, { 0,8 }, { 0,5 });					//House Collision
 	blocker.ConfigureCollision(true, false);										//Invisible Blockade Collision
 	blocker2.ConfigureCollision(true, false);										//Invisible Blockade Collision
 	blockerHouseBorder2.ConfigureCollision(true, false);							//Invisible Blockade Collision

@@ -15,9 +15,11 @@ extern Camera gCamera;
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
 
-//Music and Sound loading...
-Mix_Music *villageMusic = Mix_LoadMUS("music/village.it");
-Mix_Chunk *swordSound = Mix_LoadWAV("music/golden_sword.it");    //why the hell will you not work!!!
+////Music and Sound loading...
+//Mix_Music *BGMusic = NULL;
+//Mix_Music *BGMusic = NULL;
+//Mix_Chunk *SFX = NULL;
+//Mix_Chunk *SFX2 = NULL;
 
 
 //The window we'll be rendering to
@@ -87,32 +89,11 @@ void HandleKeyboardEvents() {
 				case SDLK_LEFT: gHorizKeysHeld -= 1; break; //left...
 				case SDLK_d: gHorizKeysHeld += 1; break;	//right...
 				case SDLK_RIGHT: gHorizKeysHeld += 1; break; //right...
-				case SDLK_e: 
-					Mix_PlayChannel(-1, swordSound, 0);
-					if (Mix_PlayChannel(-1, swordSound, 0) == -1) {
-					printf("Mix_PlayChannel: %s\n", Mix_GetError());
-					// may be critical error, or maybe just no channels were free.
-					// you could allocated another channel in that case...
-				} gFirstKeyDown = true; break;
+				case SDLK_e: gFirstKeyDown = true; break;
 				case SDLK_2: gSecondKeyDown = true; break;
 				case SDLK_3: gThirdKeyDown = true; break;
 				case SDLK_4: gFourthKeyDown = true; break;
 				case SDLK_i: gIKeyDown = !gIKeyDown; break;
-				case SDLK_m: 
-					if (!Mix_PlayingMusic())
-						Mix_PlayMusic(villageMusic, -1);
-					else if (Mix_PausedMusic())
-						Mix_ResumeMusic();
-					else
-						Mix_PauseMusic();
-					break;
-				case SDLK_n:
-					Mix_HaltMusic();
-					break;
-				default: break;
-				}
-			}
-			break;
 
 		case SDL_KEYUP:
 			if (event.key.repeat == 0) {
@@ -153,7 +134,7 @@ bool SDLInit::Setup() {
 	bool success = true;
 
 	//Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		success = false;
 	}
@@ -189,11 +170,14 @@ bool SDLInit::Setup() {
 					success = false;
 				}
 				//Initialize SDL_mixer
-				if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 4, 2048) < 0) {
-					printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
-					success = false;
-				}
+				//if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+				//	printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+				//	success = false;
+				//}
+
 				else {
+					//SFX = Mix_LoadWAV("music/golden_sword.wav"); 
+					//BGMusic = Mix_LoadMUS("music/village.it");
 					SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 				}
 			}
@@ -371,13 +355,13 @@ void SDLInit::Update() {
 void SDLInit::Cleanup() {
 	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow(gWindow);
-	Mix_FreeMusic(villageMusic);
-	Mix_FreeChunk(swordSound);
+	Mix_FreeMusic(BGMusic);
+	Mix_FreeChunk(SFX);
 
 	gWindow = NULL;
 	gRenderer = NULL;
-	villageMusic = nullptr;
-	swordSound = nullptr;
+	BGMusic = nullptr;
+	SFX = nullptr;
 	//Quit SDL subsystems
 	Mix_Quit();
 	IMG_Quit();
