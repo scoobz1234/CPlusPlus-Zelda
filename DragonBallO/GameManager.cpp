@@ -28,8 +28,22 @@ extern SDL_Renderer* gRenderer;
 Camera gCamera(CAMERA_MODE);
 World gWorld;
 
+//Music and sound
+bool BGMusicPlaying { false };
+bool BGMusicRainPlaying{ false };
+bool BGMusicInsideRainPlaying{ false };
+extern void PlayBGMusic(Mix_Music *bgmName);
+extern void PlaySFX(Mix_Chunk *sfxName);
+extern void StopBGMusic();
+extern Mix_Music *weatherRain;
+extern Mix_Music *weatherRainInside;
+extern Mix_Music *BGMusic1;
+extern Mix_Chunk *SFX2;
+extern Mix_Chunk *SFX3;
+
 //keypresses inventory
 extern bool gIKeyDown;						//bool so we can check if the I key is pressed
+extern bool gIKeyUp;
 bool invOpen{ false };						//another inventory bool so we can toggle stuff
 
 //weather stuff...
@@ -447,7 +461,7 @@ void GameManager::Render(){
 	sdlInit.DrawSprite(sawGuys);						//Render Sprite Above Player
 	sdlInit.DrawSprite(buildingInside);					//Render Sprite Above Player
 	if (!inside) {
-		if (rainOn) { sdlInit.DrawHud(rain); }			//Render Weather Under HUD
+		if (rainOn) { sdlInit.DrawHud(rain);  }			//Render Weather Under HUD
 		if (fogOn) { sdlInit.DrawHud(fog); }}			//Render Weather Under HUD
 	if (!invOpen) {
 		sdlInit.DrawHud(magicMeter);					//Render HUD
@@ -502,6 +516,9 @@ void GameManager::weatherStates() {
 		weatherGenerator = rand() % 30 + 1;								//Generators Random Number between 1-30
 	
 		if (weatherGenerator >=0 && weatherGenerator <10) {	
+			StopBGMusic();												//stops currently playing music
+			PlayBGMusic(BGMusic1);										//plays background music
+			//BGMusicPlaying = true;										//sets flag for background music playing to true
 			rainOn = false;												//if clear weather 0-10 rain false
 			fogOn = false;												//if clear weather 0-10 fog false
 			weatherTimer = 80000.f;										//if clear weather 0-10 reset timer
@@ -510,18 +527,47 @@ void GameManager::weatherStates() {
 		else if (weatherGenerator >= 10 && weatherGenerator <20) {
 			fogOn = false;												//if rainy weather 10-20 fog false
 			rainOn = true;												//if rainy weather 10-20 rain on
-			weatherTimer = 30000.f;										//if rainy weather 10-20 reset timer
+			weatherTimer = 80000.f;										//if rainy weather 10-20 reset timer
 		}
 		else if (weatherGenerator >=20) {
+			StopBGMusic();
+			PlayBGMusic(BGMusic1);
+		//	BGMusicPlaying = true;
 			rainOn = false;												//if foggy weather 20-30 rain false
 			fogOn = true;												//if foggy weather 20-30 fog false
-			weatherTimer = 20000.f;										//if foggy weather 20-30 reset timer
+			weatherTimer = 80000.f;										//if foggy weather 20-30 reset timer
 		}
 	}
 
 	if (rainOn) {
-		rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
-		rain.Update();													//if rainy weather update it!
+		if (inside && !BGMusicInsideRainPlaying) {
+			BGMusicRainPlaying = false;										//set flag for outside rain music to false
+			StopBGMusic();													//stop currently playing music
+			PlayBGMusic(weatherRainInside);									//start the inside rain music
+			BGMusicInsideRainPlaying = true;								//set flag for inside rain music to true, so we dont keep restarting it.
+			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
+			rain.Update();													//if rainy weather update it!
+		}
+		else if (inside && BGMusicInsideRainPlaying) {
+			BGMusicRainPlaying = false;										//set flag for outside rain music to false
+			BGMusicInsideRainPlaying = true;								//set the inside rain music to true (won't work without it for some reason)
+			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
+			rain.Update();													//if rainy weather update it!
+		}
+		else if (!inside && !BGMusicRainPlaying) {
+			BGMusicInsideRainPlaying = false;								//set flag for inside rain music to false (incase we went outside)
+			StopBGMusic();													//stop currently playing music
+			PlayBGMusic(weatherRain);										//start the outside rain music
+			BGMusicRainPlaying = true;										//set flag for outside rain music to true, so we dont keep restarting it.
+			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
+			rain.Update();													//if rainy weather update it!
+		}
+		else if (!inside && BGMusicRainPlaying) {
+			BGMusicInsideRainPlaying = false;								//set flag for inside rain music to false (incase we went outside)
+			BGMusicRainPlaying = true;										//set flag for outside rain to true (wont work without it for some reason)
+			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
+			rain.Update();													//if rainy weather update it!
+		}
 	}
 	else if (fogOn) {
 		fog.SetAnimSwapIndices(4, .3f, fogIndices);						//if foggy weather set the params for the class
@@ -533,10 +579,13 @@ void GameManager::weatherStates() {
 }
 void GameManager::Inventory() {
 	if (gIKeyDown) {
+		if (!invOpen)
+			PlaySFX(SFX2);
 		invOpen = true;
 	}
 	else if (!gIKeyDown) {
+		if (invOpen)
+			PlaySFX(SFX3);
 		invOpen = false;
 	}
-
 }

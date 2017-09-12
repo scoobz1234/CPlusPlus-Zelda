@@ -80,7 +80,6 @@
     <ClCompile Include="MyMath.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SDLInit.cpp" />
-    <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Weather.cpp" />
     <ClCompile Include="World.cpp" />
@@ -95,7 +94,6 @@
     <ClInclude Include="MyMath.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="SDLInit.h" />
-    <ClInclude Include="Sound.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Trigger.h" />
     <ClInclude Include="Weather.h" />

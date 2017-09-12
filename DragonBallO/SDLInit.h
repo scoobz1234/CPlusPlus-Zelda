@@ -32,4 +32,5 @@ public:
 private:
 	SDL_Rect *mDstRect = NULL;
 	SDL_Rect *mSrcRect = NULL;
+
 };

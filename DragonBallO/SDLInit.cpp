@@ -16,8 +16,13 @@ extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
 
 //Music and Sound loading...
-Mix_Music *villageMusic = Mix_LoadMUS("music/village.it");
-Mix_Chunk *swordSound = Mix_LoadWAV("music/golden_sword.it");    //why the hell will you not work!!!
+Mix_Music *BGMusic1 = NULL;
+Mix_Music *weatherRain = NULL;
+Mix_Music *weatherRainInside = NULL;
+Mix_Chunk *SFX1 = NULL;
+Mix_Chunk *SFX2 = NULL;
+Mix_Chunk *SFX3 = NULL;
+
 
 
 //The window we'll be rendering to
@@ -31,6 +36,10 @@ float gDeltaTime = 0.f;
 
 //Checked in main...
 bool gQuitGame = false;
+void PlayBGMusic(Mix_Music * bgmName);
+void StopBGMusic();
+void PlaySFX(Mix_Chunk * sfxName);
+
 
 								//Keys held down...
 int gHorizKeysHeld = 0;			//keys a and d
@@ -87,28 +96,15 @@ void HandleKeyboardEvents() {
 				case SDLK_LEFT: gHorizKeysHeld -= 1; break; //left...
 				case SDLK_d: gHorizKeysHeld += 1; break;	//right...
 				case SDLK_RIGHT: gHorizKeysHeld += 1; break; //right...
-				case SDLK_e: 
-					Mix_PlayChannel(-1, swordSound, 0);
-					if (Mix_PlayChannel(-1, swordSound, 0) == -1) {
-					printf("Mix_PlayChannel: %s\n", Mix_GetError());
-					// may be critical error, or maybe just no channels were free.
-					// you could allocated another channel in that case...
-				} gFirstKeyDown = true; break;
+				case SDLK_e: PlaySFX(SFX1); gFirstKeyDown = true; break;
 				case SDLK_2: gSecondKeyDown = true; break;
 				case SDLK_3: gThirdKeyDown = true; break;
 				case SDLK_4: gFourthKeyDown = true; break;
-				case SDLK_i: gIKeyDown = !gIKeyDown; break;
-				case SDLK_m: 
-					if (!Mix_PlayingMusic())
-						Mix_PlayMusic(villageMusic, -1);
-					else if (Mix_PausedMusic())
-						Mix_ResumeMusic();
-					else
-						Mix_PauseMusic();
-					break;
-				case SDLK_n:
-					Mix_HaltMusic();
-					break;
+				case SDLK_i:// if (!gIKeyDown) { PlaySFX(SFX2); }
+							// else { PlaySFX(SFX3); } 
+							 gIKeyDown = !gIKeyDown; break;
+				case SDLK_m: PlayBGMusic(BGMusic1); break;
+				case SDLK_n: StopBGMusic(); break;
 				default: break;
 				}
 			}
@@ -131,7 +127,7 @@ void HandleKeyboardEvents() {
 				case SDLK_2: gSecondKeyUp = true; break;
 				case SDLK_3: gThirdKeyUp = true; break;
 				case SDLK_4: gFourthKeyUp = true; break;
-				//case SDLK_i: gIKeyUp = true; break;
+			//	case SDLK_i: gIKeyUp = true; break;
 				default: break;
 				}
 			}
@@ -189,11 +185,20 @@ bool SDLInit::Setup() {
 					success = false;
 				}
 				//Initialize SDL_mixer
-				if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 4, 2048) < 0) {
+				if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
 					printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
 					success = false;
 				}
 				else {
+					BGMusic1 = Mix_LoadMUS("music/village.it");
+					weatherRain = Mix_LoadMUS("music/rain_outside.wav");
+					weatherRainInside = Mix_LoadMUS("music/rain_inside.wav");
+					SFX1 = Mix_LoadWAV("music/golden_sword.wav");
+					Mix_VolumeChunk(SFX1, MIX_MAX_VOLUME);
+					SFX2 = Mix_LoadWAV("music/menu_open.wav");
+					Mix_VolumeChunk(SFX2, MIX_MAX_VOLUME);
+					SFX3 = Mix_LoadWAV("music/menu_close.wav");
+					Mix_VolumeChunk(SFX3, MIX_MAX_VOLUME);
 					SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 				}
 			}
@@ -363,23 +368,58 @@ void SDLInit::Update() {
 
 	//Update screen
 	SDL_RenderPresent(gRenderer);
-
-	//Wait two seconds
-	//SDL_Delay( 2000 );
 }
 
 void SDLInit::Cleanup() {
 	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow(gWindow);
-	Mix_FreeMusic(villageMusic);
-	Mix_FreeChunk(swordSound);
+	//Frees up music allocated memory
+	Mix_FreeMusic(BGMusic1);
+	Mix_FreeMusic(weatherRain);
+	Mix_FreeMusic(weatherRainInside);
+	Mix_FreeChunk(SFX1);
+	Mix_FreeChunk(SFX2);
+	Mix_FreeChunk(SFX3);
 
 	gWindow = NULL;
 	gRenderer = NULL;
-	villageMusic = nullptr;
-	swordSound = nullptr;
+	BGMusic1 = nullptr;
+	weatherRain = nullptr;
+	weatherRainInside = nullptr;
+	SFX1 = nullptr;
+	SFX2 = nullptr;
+	SFX3 = nullptr;
 	//Quit SDL subsystems
 	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
+}
+
+//Plays Audio BackGround Music...
+void PlayBGMusic(Mix_Music *bgmName) {
+	//if there is no music...play music..
+	if (!Mix_PlayingMusic()) {
+		Mix_VolumeMusic(MIX_MAX_VOLUME/3);
+		Mix_PlayMusic(bgmName, -1);
+	}
+	//if music is paused... play music..
+	else if (Mix_PausedMusic()) {
+		Mix_VolumeMusic(MIX_MAX_VOLUME / 3);
+		Mix_ResumeMusic();
+	}
+	//if music is playing... pause music...
+	else
+		Mix_PauseMusic();
+}
+
+void StopBGMusic() {
+	//Stops Music
+	Mix_HaltMusic();
+}
+
+//Plays Audio Sound Effects...
+void PlaySFX(Mix_Chunk *sfxName) {
+	Mix_VolumeChunk(sfxName, MIX_MAX_VOLUME);
+	Mix_PlayChannel(-1, sfxName, 0);
+
 }
