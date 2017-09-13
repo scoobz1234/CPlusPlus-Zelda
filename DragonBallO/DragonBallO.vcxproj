@@ -82,6 +82,7 @@
     <ClCompile Include="SDLInit.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Weather.cpp" />
+    <ClCompile Include="WeatherStates.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +98,7 @@
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Trigger.h" />
     <ClInclude Include="Weather.h" />
+    <ClInclude Include="WeatherStates.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

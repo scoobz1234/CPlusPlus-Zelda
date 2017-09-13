@@ -10,6 +10,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include "WeatherStates.h"
 /*************************************************			FLAG and ECT			**************************************************/
 #define CAMERA_MODE Camera::Mode::PAN
 #define SHOW_COLLIDERS false
@@ -95,8 +96,9 @@ namespace {
 	AISprite sawGuys;						//AI Sprite
 	MoveTrigger houseToInside;				//Trigger Sprite
 	MoveTrigger houseToOutside;				//Trigger Sprite
-	Weather rain;							//Weather Sprite
-	Weather fog;							//Weather Sprite
+	WeatherStates weatherSystem(&sdlInit);	//Weather System
+	//Weather rain;							//Weather Sprite
+	//Weather fog;							//Weather Sprite
 /*************************************************		SET ANIMATION INDICES		**************************************************/
 	int witchSwapIndices[] = { 0,1,2,3,4,5,6,7};
 	int guyInBedIndices[] = {0,1};
@@ -135,8 +137,8 @@ void InitEntities() {
 	itemBox.SetTexturePath("textures/itemBox.png");							//Hud Texture Path
 	hudItems.SetTexturePath("textures/hudItems.png");						//Hud Texture Path
 	inventory.SetTexturePath("textures/Inventory.png");						//Hud Texture Path
-	rain.SetTexturePath("textures/rain2.png");								//Weather Texture Path
-	fog.SetTexturePath("textures/fog.png");									//Weather Texture Path
+	//rain.SetTexturePath("textures/rain2.png");								//Weather Texture Path
+	//fog.SetTexturePath("textures/fog.png");									//Weather Texture Path
 /*************************************************			LOAD TEXTURES			**************************************************/
 	sdlInit.LoadTexture(player);						//Player Texture Load
 	sdlInit.LoadTexture(tree);							//Sprite Texture Load
@@ -167,8 +169,8 @@ void InitEntities() {
 	sdlInit.LoadTexture(itemBox);						//Hud Texture Load
 	sdlInit.LoadTexture(hudItems);						//Hud Texture Load
 	sdlInit.LoadTexture(inventory);						//HUD Texture Load
-	sdlInit.LoadTexture(rain);							//Weather Texture Load
-	sdlInit.LoadTexture(fog);							//Weather Texture Load
+	//sdlInit.LoadTexture(rain);							//Weather Texture Load
+	//sdlInit.LoadTexture(fog);							//Weather Texture Load
 /*************************************************			SET POSITION			**************************************************/
 	player.SetPosition({ 68,143 });							//Sprite Position
 	tree.SetPosition({ 360, 20 });							//Sprite Position
@@ -207,8 +209,8 @@ void InitEntities() {
 	blockerHouseBorder4.SetPosition({1668,1016});			//Invisible Blockade Position
 	blockerHouseBorder5.SetPosition({1555,1225});			//Invisible Blockade Position
 	blockerHouseBorder6.SetPosition({1512,1300});			//Invisible Blockade Position
-	rain.SetPosition({0,0});								//Weather Position
-	fog.SetPosition({0,0});									//Weather Position
+	//rain.SetPosition({0,0});								//Weather Position
+	//fog.SetPosition({0,0});									//Weather Position
 	houseToInside.SetPosition({ 510,284 });					//Teleport Positions
 	houseToOutside.SetPosition({ 1510,1280 });				//Teleport Positions
 /*************************************************			SET SIZE				**************************************************/
@@ -251,8 +253,8 @@ void InitEntities() {
 	blockerHouseBorder4.SetSize(182,209);		//invisible blockade Size
 	blockerHouseBorder5.SetSize(302,136);		//invisible blockade Size
 	blockerHouseBorder6.SetSize(43, 60);		//invisible blockade Size
-	rain.SetSize(640,480);						//weather Size
-	fog.SetSize(640, 480);						//weather Size
+	//rain.SetSize(640,480);						//weather Size
+	//fog.SetSize(640, 480);						//weather Size
 /*************************************************		INITITIALIZE SPRITESHEETS	**************************************************/
 	player.InitSpriteSheet(0, 14, 6);					//Player Initialize SpriteSheet
 	player.SetSpriteClip(90, 1, 30, 30, 3);				//Player Set Sprite Clips			up...
@@ -263,6 +265,7 @@ void InitEntities() {
 	player.SetSpriteClip(120, 31, 30, 30, 18);			//Player Set Sprite Clips			right move...
 	player.SetSpriteClip(60, 1, 30, 30, 2);				//Player Set Sprite Clips			left...
 	player.SetSpriteClip(60, 31, 30, 30, 16);			//Player Set Sprite Clips			left move...
+
 	player.SetSpriteClip(170, 141, 30, 31, 61);			//Player Set Sprite Clips			first left attack...
 	player.SetSpriteClip(173, 109, 30, 30, 48);			//Player Set Sprite Clips			second left attack...
 	player.SetSpriteClip(173, 71, 30, 30, 34);			//Player Set Sprite Clips			last left attack...
@@ -287,20 +290,23 @@ void InitEntities() {
 	witch.SetSpriteClip(125, 0, 24, 35, 5);				//AI Set Sprite Clip
 	witch.SetSpriteClip(150, 0, 24, 35, 6);				//AI Set Sprite Clip
 	witch.SetSpriteClip(175, 0, 24, 35, 7);				//AI Set Sprite Clip
+	
 	sawGuys.InitSpriteSheet(0, 3, 1);					//AI Initialize SpriteSheet
 	sawGuys.SetSpriteClip(0,0,79,28,0);					//AI Set Sprite Clip
 	sawGuys.SetSpriteClip(80,0,79,28,1);				//AI Set Sprite Clip
 	sawGuys.SetSpriteClip(160,0,79,28,2);				//AI Set Sprite Clip
-	rain.InitSpriteSheet(0, 4, 1);						//Weather Initialize SpriteSheet
-	rain.SetSpriteClip(0, 0, 256, 223, 0);				//Weather Set Sprite Clip
-	rain.SetSpriteClip(257, 0, 256, 223, 1);			//Weather Set Sprite Clip
-	rain.SetSpriteClip(513, 0, 256, 223, 2);			//Weather Set Sprite Clip
-	rain.SetSpriteClip(769, 0, 256, 223, 3);			//Weather Set Sprite Clip
-	fog.InitSpriteSheet(0, 4, 1);						//Weather Initialize SpriteSheet
-	fog.SetSpriteClip(0, 0, 480, 360, 0);				//Weather Set Sprite Clip
-	fog.SetSpriteClip(481, 0, 480, 360, 1);				//Weather Set Sprite Clip
-	fog.SetSpriteClip(961, 0, 480, 360, 2);				//Weather Set Sprite Clip
-	fog.SetSpriteClip(1441, 0, 480, 360, 3);			//Weather Set Sprite Clip
+	
+	//rain.InitSpriteSheet(0, 4, 1);						//Weather Initialize SpriteSheet
+	//rain.SetSpriteClip(0, 0, 256, 223, 0);				//Weather Set Sprite Clip
+	//rain.SetSpriteClip(257, 0, 256, 223, 1);			//Weather Set Sprite Clip
+	//rain.SetSpriteClip(513, 0, 256, 223, 2);			//Weather Set Sprite Clip
+	//rain.SetSpriteClip(769, 0, 256, 223, 3);			//Weather Set Sprite Clip
+	//
+	//fog.InitSpriteSheet(0, 4, 1);						//Weather Initialize SpriteSheet
+	//fog.SetSpriteClip(0, 0, 480, 360, 0);				//Weather Set Sprite Clip
+	//fog.SetSpriteClip(481, 0, 480, 360, 1);				//Weather Set Sprite Clip
+	//fog.SetSpriteClip(961, 0, 480, 360, 2);				//Weather Set Sprite Clip
+	//fog.SetSpriteClip(1441, 0, 480, 360, 3);			//Weather Set Sprite Clip
 /*************************************************			SET COLLISION			**************************************************/
 	player.ConfigureCollision(true,true, {5,10}, {28,15});							//Player Collision
 	tree.ConfigureCollision(true,false, {0,15}, {0,0});								//Sprite Collision
@@ -335,8 +341,8 @@ void InitEntities() {
 	guyInBed.ConfigureCollision(true, false);										//AI Collision
 	witch.ConfigureCollision(true, false);											//AI Collision
 	sawGuys.ConfigureCollision(true, false);										//AI Collision
-	rain.ConfigureCollision(false, false);											//Weather Collision
-	fog.ConfigureCollision(false, false);											//Weather Collision
+	//rain.ConfigureCollision(false, false);											//Weather Collision
+	//fog.ConfigureCollision(false, false);											//Weather Collision
 /*************************************************			ENABLE COLLISION		**************************************************/
 	player.AddCollidableEntity(tree);							//Player/Sprite Collision
 	player.AddCollidableEntity(tree2);							//Player/Sprite Collision
@@ -372,7 +378,7 @@ void InitEntities() {
 /*************************************************		WORLD GRID INITIALIZATION	**************************************************/
 	gWorld.InitWorldGrid({ 0,70 - 35,14,70 - 16 });					//Initialize the World Grid
 /*************************************************			TELEPORT LOCATIONS		**************************************************/
-	houseToInside.SetMovePos({1520,1214},true);				//Telport Into House
+	houseToInside.SetMovePos({1520,1214},true);					//Telport Into House
 	houseToOutside.SetMovePos({ 523,312 },false);				//Teleport Outside Of House
 }
 bool GameManager::Init(){
@@ -418,8 +424,8 @@ void GameManager::Cleanup(){
 	sdlInit.CleanupSprite(hudItems);
 	sdlInit.CleanupSprite(ground1);
 	sdlInit.CleanupSprite(horizLongbush);
-	sdlInit.CleanupSprite(rain);
-	sdlInit.CleanupSprite(fog);
+	//sdlInit.CleanupSprite(rain);
+	//sdlInit.CleanupSprite(fog);
 	sdlInit.CleanupSprite(inventory);
 	sdlInit.Cleanup();
 }
@@ -427,10 +433,11 @@ void GameManager::Update() {
 /*************************************************				UPDATE				**************************************************/
 	player.Update();									//Players Update Call
 	animationStates();									//AI Animations Call
-	weatherStates();									//Weather States Call
+	//weatherStates();									//Weather States Call
 	Inventory();
 	gCamera.LookAt(player);								//Camera Looks At Player
 	sdlInit.Update();									//SDL Update Call
+	weatherSystem.Update();
 }
 
 void GameManager::Render(){
@@ -460,15 +467,17 @@ void GameManager::Render(){
 	sdlInit.DrawSprite(witch);							//Render Sprite Above Player
 	sdlInit.DrawSprite(sawGuys);						//Render Sprite Above Player
 	sdlInit.DrawSprite(buildingInside);					//Render Sprite Above Player
-	if (!inside) {
-		if (rainOn) { sdlInit.DrawHud(rain);  }			//Render Weather Under HUD
-		if (fogOn) { sdlInit.DrawHud(fog); }}			//Render Weather Under HUD
+	//if (!inside) {
+	//	if (rainOn) { sdlInit.DrawHud(rain);  }			//Render Weather Under HUD
+	//	if (fogOn) { sdlInit.DrawHud(fog); }}			//Render Weather Under HUD
+	weatherSystem.Render();
 	if (!invOpen) {
 		sdlInit.DrawHud(magicMeter);					//Render HUD
 		sdlInit.DrawHud(lifeText);						//Render HUD
 		sdlInit.DrawHud(itemBox);						//Render HUD
 		sdlInit.DrawHud(hudItems);}						//Render HUD
 	if (invOpen) { sdlInit.DrawHud(inventory); }		//Render Inventory
+	
 /*************************************************		RENDERING COLLIDERS			**************************************************/
 	if (SHOW_COLLIDERS) {
 		sdlInit.DrawEntityCollider(redHouse1);
@@ -508,75 +517,74 @@ void GameManager::animationStates() {
 	guyInBed.SetAnimSwapIndices(2, .2f, guyInBedIndices);
 	guyInBed.Update();
 }
-void GameManager::weatherStates() {
-	weatherTimer--;														//Timer De-crements every tick
-
-	if (weatherTimer <= 0) {
-		srand(time(NULL));												//Primes random # Generator
-		weatherGenerator = rand() % 30 + 1;								//Generators Random Number between 1-30
-	
-		if (weatherGenerator >=0 && weatherGenerator <10) {	
-			StopBGMusic();												//stops currently playing music
-			PlayBGMusic(BGMusic1);										//plays background music
-			//BGMusicPlaying = true;										//sets flag for background music playing to true
-			rainOn = false;												//if clear weather 0-10 rain false
-			fogOn = false;												//if clear weather 0-10 fog false
-			weatherTimer = 80000.f;										//if clear weather 0-10 reset timer
-			return;
-		}
-		else if (weatherGenerator >= 10 && weatherGenerator <20) {
-			fogOn = false;												//if rainy weather 10-20 fog false
-			rainOn = true;												//if rainy weather 10-20 rain on
-			weatherTimer = 80000.f;										//if rainy weather 10-20 reset timer
-		}
-		else if (weatherGenerator >=20) {
-			StopBGMusic();
-			PlayBGMusic(BGMusic1);
-		//	BGMusicPlaying = true;
-			rainOn = false;												//if foggy weather 20-30 rain false
-			fogOn = true;												//if foggy weather 20-30 fog false
-			weatherTimer = 80000.f;										//if foggy weather 20-30 reset timer
-		}
-	}
-
-	if (rainOn) {
-		if (inside && !BGMusicInsideRainPlaying) {
-			BGMusicRainPlaying = false;										//set flag for outside rain music to false
-			StopBGMusic();													//stop currently playing music
-			PlayBGMusic(weatherRainInside);									//start the inside rain music
-			BGMusicInsideRainPlaying = true;								//set flag for inside rain music to true, so we dont keep restarting it.
-			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
-			rain.Update();													//if rainy weather update it!
-		}
-		else if (inside && BGMusicInsideRainPlaying) {
-			BGMusicRainPlaying = false;										//set flag for outside rain music to false
-			BGMusicInsideRainPlaying = true;								//set the inside rain music to true (won't work without it for some reason)
-			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
-			rain.Update();													//if rainy weather update it!
-		}
-		else if (!inside && !BGMusicRainPlaying) {
-			BGMusicInsideRainPlaying = false;								//set flag for inside rain music to false (incase we went outside)
-			StopBGMusic();													//stop currently playing music
-			PlayBGMusic(weatherRain);										//start the outside rain music
-			BGMusicRainPlaying = true;										//set flag for outside rain music to true, so we dont keep restarting it.
-			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
-			rain.Update();													//if rainy weather update it!
-		}
-		else if (!inside && BGMusicRainPlaying) {
-			BGMusicInsideRainPlaying = false;								//set flag for inside rain music to false (incase we went outside)
-			BGMusicRainPlaying = true;										//set flag for outside rain to true (wont work without it for some reason)
-			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
-			rain.Update();													//if rainy weather update it!
-		}
-	}
-	else if (fogOn) {
-		fog.SetAnimSwapIndices(4, .3f, fogIndices);						//if foggy weather set the params for the class
-		fog.Update();													//if foggy weather update it!
-	}
-	else {
-		return;															//else return...
-	}
-}
+//void GameManager::weatherStates() {
+//	weatherTimer--;														//Timer De-crements every tick
+//
+//	if (weatherTimer <= 0) {
+//		srand(time(NULL));												//Primes random # Generator
+//		weatherGenerator = rand() % 3;								//Generators Random Number between 1-30
+//	
+//		if (weatherGenerator ==0) {	
+//			StopBGMusic();												//stops currently playing music
+//			PlayBGMusic(BGMusic1);										//plays background music
+//			rainOn = false;												//if clear weather 0-10 rain false
+//			fogOn = false;												//if clear weather 0-10 fog false
+//			weatherTimer = 80000.f;										//if clear weather 0-10 reset timer
+//			return;
+//		}
+//		else if (weatherGenerator ==1) {
+//			fogOn = false;												//if rainy weather 10-20 fog false
+//			rainOn = true;												//if rainy weather 10-20 rain on
+//			weatherTimer = 80000.f;										//if rainy weather 10-20 reset timer
+//			BGMusicRainPlaying = false;
+//		}
+//		else {
+//			StopBGMusic();
+//			PlayBGMusic(BGMusic1);
+//			rainOn = false;												//if foggy weather 20-30 rain false
+//			fogOn = true;												//if foggy weather 20-30 fog false
+//			weatherTimer = 80000.f;										//if foggy weather 20-30 reset timer
+//		}
+//	}
+//
+//	if (rainOn) {
+//		if (inside && !BGMusicInsideRainPlaying) {
+//			BGMusicRainPlaying = false;										//set flag for outside rain music to false
+//			StopBGMusic();													//stop currently playing music
+//			PlayBGMusic(weatherRainInside);									//start the inside rain music
+//			BGMusicInsideRainPlaying = true;								//set flag for inside rain music to true, so we dont keep restarting it.
+//			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
+//			rain.Update();													//if rainy weather update it!
+//		}
+//		else if (inside && BGMusicInsideRainPlaying) {
+//			BGMusicRainPlaying = false;										//set flag for outside rain music to false
+//			BGMusicInsideRainPlaying = true;								//set the inside rain music to true (won't work without it for some reason)
+//			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
+//			rain.Update();													//if rainy weather update it!
+//		}
+//		else if (!inside && !BGMusicRainPlaying) {
+//			BGMusicInsideRainPlaying = false;								//set flag for inside rain music to false (incase we went outside)
+//			StopBGMusic();													//stop currently playing music
+//			PlayBGMusic(weatherRain);										//start the outside rain music
+//			BGMusicRainPlaying = true;										//set flag for outside rain music to true, so we dont keep restarting it.
+//			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
+//			rain.Update();													//if rainy weather update it!
+//		}
+//		else if (!inside && BGMusicRainPlaying) {
+//			BGMusicInsideRainPlaying = false;								//set flag for inside rain music to false (incase we went outside)
+//			BGMusicRainPlaying = true;										//set flag for outside rain to true (wont work without it for some reason)
+//			rain.SetAnimSwapIndices(4, 6.0f, rainIndices);					//if rainy weather set the params for the class
+//			rain.Update();													//if rainy weather update it!
+//		}
+//	}
+//	else if (fogOn) {
+//		fog.SetAnimSwapIndices(4, .3f, fogIndices);						//if foggy weather set the params for the class
+//		fog.Update();													//if foggy weather update it!
+//	}
+//	else {
+//		return;															//else return...
+//	}
+//}
 void GameManager::Inventory() {
 	if (gIKeyDown) {
 		if (!invOpen)

@@ -8,6 +8,6 @@ public:
 	void Update();
 	void Render();
 	void animationStates();
-	void weatherStates();
+	//void weatherStates();
 	void Inventory();
 };

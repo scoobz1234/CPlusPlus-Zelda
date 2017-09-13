@@ -54,6 +54,9 @@
     <ClCompile Include="Weather.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WeatherStates.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDLInit.h">
@@ -93,6 +96,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Weather.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WeatherStates.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
