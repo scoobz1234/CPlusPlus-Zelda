@@ -14,8 +14,10 @@ enum WeatherState {
 };
 
 public:
-	WeatherStates(SDLInit *sdlInit);
+	WeatherStates() {};
 	~WeatherStates();
+
+	void Init(SDLInit *sdlInit);
 
 	void Update();
 	void Render();

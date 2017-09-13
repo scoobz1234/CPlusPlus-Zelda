@@ -96,7 +96,7 @@ namespace {
 	AISprite sawGuys;						//AI Sprite
 	MoveTrigger houseToInside;				//Trigger Sprite
 	MoveTrigger houseToOutside;				//Trigger Sprite
-	WeatherStates weatherSystem(&sdlInit);	//Weather System
+	WeatherStates weatherSystem;	//Weather System
 	//Weather rain;							//Weather Sprite
 	//Weather fog;							//Weather Sprite
 /*************************************************		SET ANIMATION INDICES		**************************************************/
@@ -108,6 +108,7 @@ namespace {
 }
 void InitEntities() {
 /*************************************************			SET TEXTURE PATH		**************************************************/
+	weatherSystem.Init(&sdlInit);
 	player.SetTexturePath("textures/link_sheet.png");						//Player Texture Path
 	tree.SetTexturePath("textures/tree_green.gif");							//Sprite Texture Path
 	tree2.SetTexturePath("textures/tree_green.gif");						//Sprite Texture Path

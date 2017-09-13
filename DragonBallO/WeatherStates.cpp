@@ -19,7 +19,7 @@ namespace {
 	int fogIndices[] = { 0,1,2,3 };
 }
 
-WeatherStates::WeatherStates(SDLInit *sdlInit) {
+void WeatherStates::Init(SDLInit *sdlInit) {
 	mSdlInit = sdlInit;
 	//RAIN
 	mRain.SetTexturePath("textures/rain2.png");								//Weather Texture Path
@@ -32,7 +32,7 @@ WeatherStates::WeatherStates(SDLInit *sdlInit) {
 	mRain.SetSpriteClip(257, 0, 256, 223, 1);								//Weather Set Sprite Clip
 	mRain.SetSpriteClip(513, 0, 256, 223, 2);								//Weather Set Sprite Clip
 	mRain.SetSpriteClip(769, 0, 256, 223, 3);								//Weather Set Sprite Clip
-	//FOG
+																			//FOG
 	mFog.SetTexturePath("textures/fog.png");									//Weather Texture Path
 	mSdlInit->LoadTexture(mFog);												//Weather Texture Load
 	mFog.SetPosition({ 0,0 });												//Weather Position
@@ -97,8 +97,17 @@ void WeatherStates::Update() {
 
 
 void WeatherStates::Render() {
-	mSdlInit->DrawHud(mFog);
-	mSdlInit->DrawHud(mRain);
+	switch (mLastWeatherState) {
+		case WeatherState::RAIN:
+			mSdlInit->DrawHud(mRain);
+			break;
+		case WeatherState::FOG:
+			mSdlInit->DrawHud(mFog);
+			break;
+		case WeatherState::SUNNY:
+			//Draw nothing...
+			break;
+	}
 }
 
 
