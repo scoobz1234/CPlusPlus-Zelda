@@ -4,6 +4,7 @@
 using namespace MyMath;
 
 extern Camera gCamera;
+bool hasCollided;
 
 void Entity::Update() {
 	CheckCollision();
@@ -74,7 +75,7 @@ void Entity::CheckCollision() {
 		float bottomDist = bottomLeft.y - otherBottomLeft.y;
 		bool collidesVert = topDist < collisionHeight && bottomDist < collisionHeight;
 
-		bool hasCollided = collidesHoriz && collidesVert;
+		hasCollided = collidesHoriz && collidesVert;
 
 		//other->mBlockedSides |= 1 << 0;	//blocks right...
 		//other->mBlockedSides |= 1 << 1;	//blocks top...

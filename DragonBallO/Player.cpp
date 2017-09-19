@@ -20,6 +20,7 @@ extern Camera gCamera;
 float oldX;
 float oldY;
 // turn this on if you want to print your players position to the console.
+
 bool needCoords = false;
 
 //Keys held down...
@@ -37,6 +38,7 @@ extern bool gFirstKeyUp;	//keys e
 extern bool gSecondKeyUp;	//keys 2
 extern bool gThirdKeyUp;	//keys 3
 extern bool gFourthKeyUp;	//keys 4
+
 
 namespace {
 	int lastMoveIndex = 4;
@@ -155,7 +157,6 @@ void Player::Attack() {
 	if (attackTimer > 0.f) {
 		attackTimer -= gDeltaTime;	//Updates timer...
 		float time = 1.f - (attackTimer / attackTime);
-
 		int index = (int)(time * ANIM_ATTACK_COUNT) % ANIM_ATTACK_COUNT;
 		mSpriteClipIndex = animAttackLeftIndices[lastAttackIndex][index];
 

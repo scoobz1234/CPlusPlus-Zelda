@@ -7,11 +7,7 @@
 class WeatherStates
 {
 
-enum WeatherState {
-	SUNNY,
-	RAIN,
-	FOG
-};
+enum WeatherState {SUNNY,RAIN,FOG};
 
 public:
 	WeatherStates() {};

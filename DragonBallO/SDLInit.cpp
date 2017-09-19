@@ -19,9 +19,11 @@ extern const int SCREEN_HEIGHT;
 Mix_Music *BGMusic1 = NULL;
 Mix_Music *weatherRain = NULL;
 Mix_Music *weatherRainInside = NULL;
+Mix_Music *selectScreen = NULL;
 Mix_Chunk *SFX1 = NULL;
 Mix_Chunk *SFX2 = NULL;
 Mix_Chunk *SFX3 = NULL;
+Mix_Chunk *SFX4 = NULL;
 
 
 
@@ -51,6 +53,7 @@ bool gSecondKeyDown = false;	//keys 2
 bool gThirdKeyDown = false;		//keys 3
 bool gFourthKeyDown = false;	//keys 4
 bool gIKeyDown = false;			//keys I
+bool gEKeyDown = false;			//keys E
 
 								//Keys released...
 bool gFirstKeyUp = false;		//keys 1
@@ -95,16 +98,15 @@ void HandleKeyboardEvents() {
 				case SDLK_a: gHorizKeysHeld -= 1; break;	//left...
 				case SDLK_LEFT: gHorizKeysHeld -= 1; break; //left...
 				case SDLK_d: gHorizKeysHeld += 1; break;	//right...
+				case SDLK_e: gEKeyDown = !gEKeyDown; break;
 				case SDLK_RIGHT: gHorizKeysHeld += 1; break; //right...
-				case SDLK_e: PlaySFX(SFX1); gFirstKeyDown = true; break;
+				case SDLK_SPACE: PlaySFX(SFX1); gFirstKeyDown = true; break;
 				case SDLK_2: gSecondKeyDown = true; break;
 				case SDLK_3: gThirdKeyDown = true; break;
 				case SDLK_4: gFourthKeyDown = true; break;
-				case SDLK_i:// if (!gIKeyDown) { PlaySFX(SFX2); }
-							// else { PlaySFX(SFX3); } 
-							 gIKeyDown = !gIKeyDown; break;
-				case SDLK_m: PlayBGMusic(BGMusic1); break;
-				case SDLK_n: StopBGMusic(); break;
+				case SDLK_i: gIKeyDown = !gIKeyDown; break;
+				case SDLK_m: break;
+				case SDLK_n: break;
 				default: break;
 				}
 			}
@@ -194,12 +196,15 @@ bool SDLInit::Setup() {
 					BGMusic1 = Mix_LoadMUS("music/village.it");
 					weatherRain = Mix_LoadMUS("music/rain_outside.wav");
 					weatherRainInside = Mix_LoadMUS("music/rain_inside.wav");
+					selectScreen = Mix_LoadMUS("music/select_screen.mp3");
 					SFX1 = Mix_LoadWAV("music/golden_sword.wav");
 					Mix_VolumeChunk(SFX1, MIX_MAX_VOLUME);
 					SFX2 = Mix_LoadWAV("music/menu_open.wav");
 					Mix_VolumeChunk(SFX2, MIX_MAX_VOLUME);
 					SFX3 = Mix_LoadWAV("music/menu_close.wav");
 					Mix_VolumeChunk(SFX3, MIX_MAX_VOLUME);
+					SFX4 = Mix_LoadWAV("music/Menu_Select.wav");
+					Mix_VolumeChunk(SFX4, MIX_MAX_VOLUME);
 					SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 				}
 			}
@@ -378,6 +383,7 @@ void SDLInit::Cleanup() {
 	Mix_FreeMusic(BGMusic1);
 	Mix_FreeMusic(weatherRain);
 	Mix_FreeMusic(weatherRainInside);
+	Mix_FreeMusic(selectScreen);
 	Mix_FreeChunk(SFX1);
 	Mix_FreeChunk(SFX2);
 	Mix_FreeChunk(SFX3);
@@ -387,6 +393,7 @@ void SDLInit::Cleanup() {
 	BGMusic1 = nullptr;
 	weatherRain = nullptr;
 	weatherRainInside = nullptr;
+	selectScreen = nullptr;
 	SFX1 = nullptr;
 	SFX2 = nullptr;
 	SFX3 = nullptr;
