@@ -53,8 +53,8 @@ void Camera::SetPos(Float2 pos) {
 		return;
 	}
 
-	zoneIndX = gWorld.GetIndX(mPos.x);
-	zoneIndY = gWorld.GetIndY(mPos.y);
+	zoneIndX = gWorld.GetIndX(pos.x);
+	zoneIndY = gWorld.GetIndY(pos.y);
 	nextZoneBound = gWorld.GetZoneBoundary(zoneIndX, zoneIndY);;
 	panTime = 1.0f;
 }

@@ -13,7 +13,7 @@
 #include "WeatherStates.h"
 #include <chrono>
 #include <thread>
-/*************************************************			FLAG and ECT			**************************************************/
+/*************************************************			FLAGS and ECT			**************************************************/
 #define CAMERA_MODE Camera::Mode::PAN
 #define SHOW_COLLIDERS false
 
