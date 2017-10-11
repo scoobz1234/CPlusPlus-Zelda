@@ -3,12 +3,12 @@
 #include <iostream>
 #include <windows.h>
 
-#define ANIM_RIGHT_COUNT 2
-#define ANIM_LEFT_COUNT 2
-#define ANIM_UP_COUNT 2
-#define ANIM_DOWN_COUNT 2
+#define ANIM_RIGHT_COUNT 7
+#define ANIM_LEFT_COUNT 7
+#define ANIM_UP_COUNT 7
+#define ANIM_DOWN_COUNT 7
 
-#define ANIM_ATTACK_COUNT 3
+#define ANIM_ATTACK_COUNT 9
 
 //1.4142f = sqrt(sqr(1) + sqr(1))
 #define SQRHYPE 1.4142f	
@@ -21,7 +21,7 @@ float oldX;
 float oldY;
 // turn this on if you want to print your players position to the console.
 
-bool needCoords = false;
+bool needCoords = true;
 
 //Keys held down...
 extern int gHorizKeysHeld;	//keys a and b
@@ -47,7 +47,7 @@ namespace {
 
 namespace {
 	//Animation times...
-	float attackTime = .25f;
+	float attackTime = 5.0f;
 
 	//Animation timers...
 	float moveRightTimer = 0.f;
@@ -62,16 +62,16 @@ namespace {
 	float animAttackSpeed = 12;
 
 	//Animation indices...
-	int animRightIndices[ANIM_RIGHT_COUNT] = { 4, 18 };
-	int animLeftIndices[ANIM_LEFT_COUNT] = { 2, 16 };
-	int animUpIndices[ANIM_UP_COUNT] = { 3, 17 };
-	int animDownIndices[ANIM_DOWN_COUNT] = { 1, 15 };
+	int animRightIndices[ANIM_RIGHT_COUNT] = { 48,49,50,51,52,53,54 };
+	int animLeftIndices[ANIM_LEFT_COUNT] = { 40,41,42,43,44,45,46 };
+	int animUpIndices[ANIM_UP_COUNT] = { 33,34,35,36,37,38,39 };
+	int animDownIndices[ANIM_DOWN_COUNT] = { 55,56,57,58,59,60,61 };
 
 	int animAttackLeftIndices[4][ANIM_ATTACK_COUNT] = {
-		{ 35, 49, 62 },	//right attack...
-		{ 61, 48, 34 },	//left attack...
-		{ 61, 48, 34 },	//down attack...
-		{ 61, 48, 34 }	//up attack...
+		{ 18, 22},//{ 18, 19, 20, 21, 22, 23, 24, 25, 26 },	//right attack...
+		{ 9, 10, 11, 12, 13, 14, 15, 16, 17 },	//left attack...
+		{ 27, 28, 29, 30, 31, 32 },	//down attack...
+		{ 0, 1, 2, 3, 4, 5, 6, 7, 8 }	//up attack...
 	};
 }
 

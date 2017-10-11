@@ -15,7 +15,7 @@
 #include <thread>
 /*************************************************			FLAGS and ECT			**************************************************/
 #define CAMERA_MODE Camera::Mode::PAN
-#define SHOW_COLLIDERS false
+#define SHOW_COLLIDERS true
 
 using namespace std;
 using namespace std::this_thread;
@@ -59,7 +59,7 @@ bool playingMusic = false;
 static SDLInit sdlInit;
 
 //GameManager::LoadedScene ls = GameManager::LoadedScene::LIGHTWORLD;
-GameManager::LoadedScene ls = GameManager::LoadedScene::SPLASH;
+GameManager::LoadedScene ls = GameManager::LoadedScene::LIGHTWORLD;
 namespace {
 	Player player;															//Player
 	Sprite tree;															//Sprite
@@ -118,31 +118,105 @@ namespace {
 
 void InitEntities() {
 	//CLASS PLAYER
-	player.SetTexturePath("textures/link_sheet.png");						//Player Texture Path
+	player.SetTexturePath("textures/link_walk_attack.png");						//Player Texture Path
 	sdlInit.LoadTexture(player);											//Player Texture Load
 	player.SetPosition({ 68,143 });											//Sprite Position
-	player.SetSize(45, 45);													//player Size
-	player.InitSpriteSheet(0, 14, 6);										//Player Initialize SpriteSheet
-	player.SetSpriteClip(90, 1, 30, 30, 3);									//Player Set Sprite Clips			up...
-	player.SetSpriteClip(90, 31, 30, 30, 17);								//Player Set Sprite Clips			up move...
-	player.SetSpriteClip(30, 1, 30, 30, 1);									//Player Set Sprite Clips			down...
-	player.SetSpriteClip(30, 31, 30, 30, 15);								//Player Set Sprite Clips			down move...
-	player.SetSpriteClip(120, 1, 30, 30, 4);								//Player Set Sprite Clips			right...
-	player.SetSpriteClip(120, 31, 30, 30, 18);								//Player Set Sprite Clips			right move...
-	player.SetSpriteClip(60, 1, 30, 30, 2);									//Player Set Sprite Clips			left...
-	player.SetSpriteClip(60, 31, 30, 30, 16);								//Player Set Sprite Clips			left move...
-	player.SetSpriteClip(170, 141, 30, 31, 61);								//Player Set Sprite Clips			first left attack...
-	player.SetSpriteClip(173, 109, 30, 30, 48);								//Player Set Sprite Clips			second left attack...
-	player.SetSpriteClip(173, 71, 30, 30, 34);								//Player Set Sprite Clips			last left attack...
-	player.SetSpriteClip(203, 142, 30, 30, 62);								//Player Set Sprite Clips			last right attack...
-	player.SetSpriteClip(203, 109, 30, 30, 49);								//Player Set Sprite Clips			second right attack...
-	player.SetSpriteClip(203, 77, 30, 31, 35);								//Player Set Sprite Clips			first right attack...
-	player.SetAnchorOffset({ -16, -13 }, 61);								//Player Set Sprite Clips			first left attack...
-	player.SetAnchorOffset({ -23, -10 }, 48);								//Player Set Sprite Clips			second left attack...
-	player.SetAnchorOffset({ -26, -5 }, 34);								//Player Set Sprite Clips			last left attack...
-	player.SetAnchorOffset({ 4, 0 }, 62);									//Player Set Sprite Clips			last right attack...
-	player.SetAnchorOffset({ 2, -10 }, 49);									//Player Set Sprite Clips			second right attack...
-	player.SetAnchorOffset({ -11, -13 }, 35);								//Player Set Sprite Clips			first right attack...=>2
+	player.SetSize(25, 25);													//player Size
+	player.InitSpriteSheet(0, 33, 2);										//Player Initialize SpriteSheet
+	//up attack 1-8
+	player.SetSpriteClip(0, 14, 19, 22, 0);
+	player.SetSpriteClip(25, 14, 19, 22, 1);
+	player.SetSpriteClip(60, 12, 23, 24, 2);
+	player.SetSpriteClip(95, 6 , 22, 30, 3);
+	player.SetSpriteClip(130, 4, 20, 32, 4);
+	player.SetSpriteClip(165, 1, 20, 35, 5);
+	player.SetSpriteClip(200, 6, 24, 30, 6);
+	player.SetSpriteClip(235, 9, 29, 27, 7);
+	player.SetSpriteClip(270, 13, 32, 23, 8);
+	//left attack 9-17
+	player.SetSpriteClip(305, 5, 23, 31, 9);
+	player.SetSpriteClip(340, 8, 28, 28, 10);
+	player.SetSpriteClip(375, 15, 28, 21, 11);
+	player.SetSpriteClip(410, 15, 31, 21, 12);
+	player.SetSpriteClip(445, 15,29, 21, 13);
+	player.SetSpriteClip(480, 12, 26, 24, 14);
+	player.SetSpriteClip(512, 12, 23, 24, 15);
+	player.SetSpriteClip(550, 13, 18, 23, 16);
+	player.SetSpriteClip(585, 13, 16, 23, 17);
+	//right attack 18-26	****************************************************************************
+	player.SetSpriteClip(620, 13, 29, 23, 18); //16, 23, 18);
+	player.SetSpriteClip(655, 13, 18, 23, 19);
+	player.SetSpriteClip(690, 12, 23, 24, 20);
+	player.SetSpriteClip(725, 12, 26, 24, 21);
+	player.SetSpriteClip(760, 15, 29, 23, 22);	//
+	player.SetSpriteClip(795, 15, 31, 21, 23);
+	player.SetSpriteClip(830, 15, 28, 21, 24);
+	player.SetSpriteClip(865, 8, 28, 28, 25);
+	player.SetSpriteClip(900, 5, 23, 31, 26);
+	player.SetAnchorOffset({ -13, -2 }, 18);	//just movement, does NOT effect scale...
+	//down attack 27-32		*****************************************************************************
+	player.SetSpriteClip(935, 13, 20, 23, 27);
+	player.SetSpriteClip(970, 7, 21, 29, 28);
+	player.SetSpriteClip(1005, 5, 20, 31, 29);
+	player.SetSpriteClip(1040, 5, 20, 31, 30);
+	player.SetSpriteClip(1075, 7, 28, 29, 31);
+	player.SetSpriteClip(1110, 9, 32, 27, 32);
+	//up move 33-39
+	player.SetSpriteClip(0, 47, 17, 24, 33);
+	player.SetSpriteClip(25, 48, 17, 23, 34);
+	player.SetSpriteClip(60, 49, 17, 22, 35);
+	player.SetSpriteClip(95, 49, 17, 22, 36);
+	player.SetSpriteClip(130, 49, 17, 22, 37);
+	player.SetSpriteClip(165, 48, 17, 23, 38);
+	player.SetSpriteClip(200, 47, 17, 24, 39);
+	//left move 40-47
+	player.SetSpriteClip(235, 48, 19, 23, 40);
+	player.SetSpriteClip(270, 47, 18, 24, 41);
+	player.SetSpriteClip(305, 47, 19, 24, 42);
+	player.SetSpriteClip(340, 48, 19, 23, 43);
+	player.SetSpriteClip(375, 47, 19, 24, 44);
+	player.SetSpriteClip(410, 47, 18, 24, 45);
+	player.SetSpriteClip(445, 48, 18, 23, 46);
+	//right move 48-54
+	player.SetSpriteClip(480, 48, 18, 23, 48);
+	player.SetSpriteClip(515, 47, 18, 24, 49);
+	player.SetSpriteClip(550, 47, 19, 24, 50);
+	player.SetSpriteClip(585, 48, 19, 23, 51);
+	player.SetSpriteClip(620, 47, 19, 24, 52);
+	player.SetSpriteClip(655, 47, 18, 24, 53);
+	player.SetSpriteClip(690, 48, 19, 23, 54);
+	//down move 55-61
+	player.SetSpriteClip(725, 47, 16, 24, 55);
+	player.SetSpriteClip(760, 48, 16, 23, 56);
+	player.SetSpriteClip(795, 49, 16, 22, 57);
+	player.SetSpriteClip(830, 49, 16, 22, 58);
+	player.SetSpriteClip(865, 49, 16, 22, 59);
+	player.SetSpriteClip(900, 48, 16, 23, 60);
+	player.SetSpriteClip(935, 47, 16, 24, 61);
+
+
+	//player.SetSpriteClip(90, 1, 30, 30, 3);									//Player Set Sprite Clips			up...
+	//player.SetSpriteClip(90, 31, 30, 30, 17);								//Player Set Sprite Clips			up move...
+	//player.SetSpriteClip(30, 1, 30, 30, 1);									//Player Set Sprite Clips			down...
+	//player.SetSpriteClip(30, 31, 30, 30, 15);								//Player Set Sprite Clips			down move...
+	//player.SetSpriteClip(120, 1, 30, 30, 4);								//Player Set Sprite Clips			right...
+	//player.SetSpriteClip(120, 31, 30, 30, 18);								//Player Set Sprite Clips			right move...
+	//player.SetSpriteClip(60, 1, 30, 30, 2);									//Player Set Sprite Clips			left...
+	//player.SetSpriteClip(60, 31, 30, 30, 16);								//Player Set Sprite Clips			left move...
+	//player.SetSpriteClip(170, 141, 30, 31, 61);								//Player Set Sprite Clips			first left attack...
+	//player.SetSpriteClip(173, 109, 30, 30, 48);								//Player Set Sprite Clips			second left attack...
+	//player.SetSpriteClip(173, 71, 30, 30, 34);								//Player Set Sprite Clips			last left attack...
+	//player.SetSpriteClip(203, 142, 30, 30, 62);								//Player Set Sprite Clips			last right attack...
+	//player.SetSpriteClip(203, 109, 30, 30, 49);								//Player Set Sprite Clips			second right attack...
+	//player.SetSpriteClip(203, 77, 30, 31, 35);								//Player Set Sprite Clips			first right attack...
+	//player.SetSpriteClip(300, 0, 25,30, 65);									//Player Set Sprite Clips			last up attack...
+	//player.SetAnchorOffset({ -8, -10 }, 65);
+	//player.SetAnchorOffset({ -16, -13 }, 61);								//Player Set Sprite Clips			first left attack...
+	//player.SetAnchorOffset({ -23, -10 }, 48);								//Player Set Sprite Clips			second left attack...
+	//player.SetAnchorOffset({ -26, -5 }, 34);								//Player Set Sprite Clips			last left attack...
+	//player.SetAnchorOffset({ 4, 0 }, 62);									//Player Set Sprite Clips			last right attack...
+	//player.SetAnchorOffset({ 2, -10 }, 49);									//Player Set Sprite Clips			second right attack...
+	//player.SetAnchorOffset({ -11, -13 }, 35);								//Player Set Sprite Clips			first right attack...=>2
 	player.ConfigureCollision(true, true, { 5,10 }, { 28,15 });				//Player Collision
 	player.AddCollidableEntity(tree);										//Player/Sprite Collision
 	player.AddCollidableEntity(tree2);										//Player/Sprite Collision
@@ -567,7 +641,7 @@ void GameManager::Render(){
 		sdlInit.DrawSprite(witch);							//Render Sprite Above Player
 		sdlInit.DrawSprite(sawGuys);						//Render Sprite Above Player
 		sdlInit.DrawSprite(buildingInside);					//Render Sprite Above Player
-		weatherSystem.Render();
+		//weatherSystem.Render();
 		if (!invOpen) {
 			sdlInit.DrawHud(magicMeter);					//Render HUD
 			sdlInit.DrawHud(lifeText);						//Render HUD
