@@ -3,6 +3,7 @@
 #include "SDLInit.h"
 #include "World.h"
 #include "Player.h"
+#include "NPC.h"
 #include "Camera.h"
 #include "MoveTrigger.h"
 #include "AISprite.h"
@@ -101,6 +102,7 @@ namespace {
 	MoveTrigger houseToInside;												//Trigger Sprite
 	MoveTrigger houseToOutside;												//Trigger Sprite
 	WeatherStates weatherSystem;											//Weather System
+	NPC guard;																//AI NPC
 	
 	//SPLASH
 	AISprite splashBackground;
@@ -121,103 +123,156 @@ void InitEntities() {
 	player.SetTexturePath("textures/link_walk_attack.png");						//Player Texture Path
 	sdlInit.LoadTexture(player);											//Player Texture Load
 	player.SetPosition({ 68,143 });											//Sprite Position
-	player.SetSize(25, 25);													//player Size
-	player.InitSpriteSheet(0, 33, 2);										//Player Initialize SpriteSheet
+	player.SetSize(45, 45);													//player Size
+	player.InitSpriteSheet(0, 21, 4);										//Player Initialize SpriteSheet
 	//up attack 1-8
-	player.SetSpriteClip(0, 14, 19, 22, 0);
-	player.SetSpriteClip(25, 14, 19, 22, 1);
-	player.SetSpriteClip(60, 12, 23, 24, 2);
-	player.SetSpriteClip(95, 6 , 22, 30, 3);
-	player.SetSpriteClip(130, 4, 20, 32, 4);
-	player.SetSpriteClip(165, 1, 20, 35, 5);
-	player.SetSpriteClip(200, 6, 24, 30, 6);
-	player.SetSpriteClip(235, 9, 29, 27, 7);
-	player.SetSpriteClip(270, 13, 32, 23, 8);
+	player.SetSpriteClip(0, 0, 45, 45, 0);
+	player.SetSpriteClip(46, 0, 45, 45, 1);
+	player.SetSpriteClip(91, 0, 45, 45, 2);
+	player.SetSpriteClip(136, 0 , 45, 45, 3);
+	player.SetSpriteClip(181, 0, 45, 45, 4);
+	player.SetSpriteClip(226, 0, 45, 45, 5);
+	player.SetSpriteClip(271, 0, 45, 45, 6);
+	player.SetSpriteClip(316, 0, 45, 45, 7);
+	player.SetSpriteClip(361, 0, 45, 45, 8);
+
+	player.SetAnchorOffset({ 0, -8 }, 0);
+	player.SetAnchorOffset({ 0, -8 }, 1);
+	player.SetAnchorOffset({ 0, -8 }, 2);
+	player.SetAnchorOffset({ 0, -8 }, 3);
+	player.SetAnchorOffset({ 0, -8 }, 4);
+	player.SetAnchorOffset({ 0, -8 }, 5);
+	player.SetAnchorOffset({ 0, -8 }, 6);
+	player.SetAnchorOffset({ 0, -8 }, 7);
+	player.SetAnchorOffset({ 0, -8 }, 8);
+
 	//left attack 9-17
-	player.SetSpriteClip(305, 5, 23, 31, 9);
-	player.SetSpriteClip(340, 8, 28, 28, 10);
-	player.SetSpriteClip(375, 15, 28, 21, 11);
-	player.SetSpriteClip(410, 15, 31, 21, 12);
-	player.SetSpriteClip(445, 15,29, 21, 13);
-	player.SetSpriteClip(480, 12, 26, 24, 14);
-	player.SetSpriteClip(512, 12, 23, 24, 15);
-	player.SetSpriteClip(550, 13, 18, 23, 16);
-	player.SetSpriteClip(585, 13, 16, 23, 17);
-	//right attack 18-26	****************************************************************************
-	player.SetSpriteClip(620, 13, 29, 23, 18); //16, 23, 18);
-	player.SetSpriteClip(655, 13, 18, 23, 19);
-	player.SetSpriteClip(690, 12, 23, 24, 20);
-	player.SetSpriteClip(725, 12, 26, 24, 21);
-	player.SetSpriteClip(760, 15, 29, 23, 22);	//
-	player.SetSpriteClip(795, 15, 31, 21, 23);
-	player.SetSpriteClip(830, 15, 28, 21, 24);
-	player.SetSpriteClip(865, 8, 28, 28, 25);
-	player.SetSpriteClip(900, 5, 23, 31, 26);
-	player.SetAnchorOffset({ -13, -2 }, 18);	//just movement, does NOT effect scale...
-	//down attack 27-32		*****************************************************************************
-	player.SetSpriteClip(935, 13, 20, 23, 27);
-	player.SetSpriteClip(970, 7, 21, 29, 28);
-	player.SetSpriteClip(1005, 5, 20, 31, 29);
-	player.SetSpriteClip(1040, 5, 20, 31, 30);
-	player.SetSpriteClip(1075, 7, 28, 29, 31);
-	player.SetSpriteClip(1110, 9, 32, 27, 32);
+	player.SetSpriteClip(406, 0, 45, 45, 17);
+	player.SetSpriteClip(451, 0, 45, 45, 16);
+	player.SetSpriteClip(496, 0, 45, 45, 15);
+	player.SetSpriteClip(541, 0, 45, 45, 14);
+	player.SetSpriteClip(586, 0, 45, 45, 13);
+	player.SetSpriteClip(631, 0, 45, 45, 12);
+	player.SetSpriteClip(676, 0, 45, 45, 11);
+	player.SetSpriteClip(721, 0, 45, 45, 10);
+	player.SetSpriteClip(766, 0, 45, 45, 9);
+
+	player.SetAnchorOffset({ -8, -3 }, 10);
+	player.SetAnchorOffset({ -8, -3 }, 11);
+	player.SetAnchorOffset({ -8, -3 }, 12);
+	player.SetAnchorOffset({ -8, -3 }, 13);
+	player.SetAnchorOffset({ -8, -3 }, 14);
+	player.SetAnchorOffset({ -8, -3 }, 15);
+	player.SetAnchorOffset({ -8, -3 }, 16);
+	player.SetAnchorOffset({ -8, -3 }, 17);
+	player.SetAnchorOffset({ -8, -3 }, 9);
+
+	//right attack 18-26	
+	player.SetSpriteClip(0, 46, 45, 45, 18);
+	player.SetSpriteClip(46, 46, 45, 45, 19);
+	player.SetSpriteClip(91, 46, 45, 45, 20);
+	player.SetSpriteClip(136, 46, 45, 45, 21);
+	player.SetSpriteClip(181, 46, 45, 45, 22);	
+	player.SetSpriteClip(226, 46, 45, 45, 23);
+	player.SetSpriteClip(271, 46, 45, 45, 24);
+	player.SetSpriteClip(316, 46, 45, 45, 25);
+	player.SetSpriteClip(361, 46, 45, 45, 26);
+
+	player.SetAnchorOffset({ 0, -3 }, 18);
+	player.SetAnchorOffset({ 0, -3 }, 19);
+	player.SetAnchorOffset({ 0, -3 }, 20);
+	player.SetAnchorOffset({ 0, -3 }, 21);
+	player.SetAnchorOffset({ 0, -3 }, 22);
+	player.SetAnchorOffset({ 0, -3 }, 23);
+	player.SetAnchorOffset({ 0, -3 }, 24);
+	player.SetAnchorOffset({ 0, -3 }, 25);
+	player.SetAnchorOffset({ 0, -3 }, 26);
+
+	//down attack 27-32
+	player.SetSpriteClip(406, 46, 45, 45, 27);
+	player.SetSpriteClip(451, 46, 45, 45, 28);
+	player.SetSpriteClip(496, 46, 45, 45, 29);
+	player.SetSpriteClip(541, 46, 45, 45, 30);
+	player.SetSpriteClip(586, 46, 45, 45, 31);
+	player.SetSpriteClip(631, 46, 45, 45, 32);
+
+	player.SetAnchorOffset({ 0, 0 }, 27);
+	player.SetAnchorOffset({ 0, 0 }, 28);
+	player.SetAnchorOffset({ 0, 0 }, 29);
+	player.SetAnchorOffset({ 0, 0 }, 30);
+	player.SetAnchorOffset({ 0, 0 }, 31);
+	player.SetAnchorOffset({ 0, 0 }, 32);
+
 	//up move 33-39
-	player.SetSpriteClip(0, 47, 17, 24, 33);
-	player.SetSpriteClip(25, 48, 17, 23, 34);
-	player.SetSpriteClip(60, 49, 17, 22, 35);
-	player.SetSpriteClip(95, 49, 17, 22, 36);
-	player.SetSpriteClip(130, 49, 17, 22, 37);
-	player.SetSpriteClip(165, 48, 17, 23, 38);
-	player.SetSpriteClip(200, 47, 17, 24, 39);
+	player.SetSpriteClip(0, 91, 45, 45, 33);
+	player.SetSpriteClip(46, 91, 45, 45, 34);
+	player.SetSpriteClip(91, 91, 45, 45, 35);
+	player.SetSpriteClip(136, 91, 45, 45, 36);
+	player.SetSpriteClip(181, 91, 45, 45, 37);
+	player.SetSpriteClip(226, 91, 45, 45, 38);
+	player.SetSpriteClip(271, 91, 45, 45, 39);
+
+	player.SetAnchorOffset({ -5, 0 }, 33);
+	player.SetAnchorOffset({ -5, 0 }, 34);
+	player.SetAnchorOffset({ -5, 0 }, 35);
+	player.SetAnchorOffset({ -5, 0 }, 36);
+	player.SetAnchorOffset({ -5, 0 }, 37);
+	player.SetAnchorOffset({ -5, 0 }, 38);
+	player.SetAnchorOffset({ -5, 0 }, 39);
+
 	//left move 40-47
-	player.SetSpriteClip(235, 48, 19, 23, 40);
-	player.SetSpriteClip(270, 47, 18, 24, 41);
-	player.SetSpriteClip(305, 47, 19, 24, 42);
-	player.SetSpriteClip(340, 48, 19, 23, 43);
-	player.SetSpriteClip(375, 47, 19, 24, 44);
-	player.SetSpriteClip(410, 47, 18, 24, 45);
-	player.SetSpriteClip(445, 48, 18, 23, 46);
+	player.SetSpriteClip(316, 91, 45, 45, 40);
+	player.SetSpriteClip(361, 91, 45, 45, 41);
+	player.SetSpriteClip(406, 91, 45, 45, 42);
+	player.SetSpriteClip(451, 91, 45, 45, 43);
+	player.SetSpriteClip(496, 91, 45, 45, 44);
+	player.SetSpriteClip(541, 91, 45, 45, 45);
+	player.SetSpriteClip(586, 91, 45, 45, 46);
+
+	player.SetAnchorOffset({ 0, 0 }, 40);
+	player.SetAnchorOffset({ 0, 0 }, 41);
+	player.SetAnchorOffset({ 0, 0 }, 42);
+	player.SetAnchorOffset({ 0, 0 }, 43);
+	player.SetAnchorOffset({ 0, 0 }, 44);
+	player.SetAnchorOffset({ 0, 0 }, 45);
+	player.SetAnchorOffset({ 0, 0 }, 46);
+
 	//right move 48-54
-	player.SetSpriteClip(480, 48, 18, 23, 48);
-	player.SetSpriteClip(515, 47, 18, 24, 49);
-	player.SetSpriteClip(550, 47, 19, 24, 50);
-	player.SetSpriteClip(585, 48, 19, 23, 51);
-	player.SetSpriteClip(620, 47, 19, 24, 52);
-	player.SetSpriteClip(655, 47, 18, 24, 53);
-	player.SetSpriteClip(690, 48, 19, 23, 54);
+	player.SetSpriteClip(631, 91, 45, 45, 48);
+	player.SetSpriteClip(676, 91, 45, 45, 49);
+	player.SetSpriteClip(721, 91, 45, 45, 50);
+	player.SetSpriteClip(766, 91, 45, 45, 51);
+	player.SetSpriteClip(811, 91, 45, 45, 52);
+	player.SetSpriteClip(856, 91, 45, 45, 53);
+	player.SetSpriteClip(901, 91, 45, 45, 54);
+
+	player.SetAnchorOffset({ -5, 0 }, 48);
+	player.SetAnchorOffset({ -5, 0 }, 49);
+	player.SetAnchorOffset({ -5, 0 }, 50);
+	player.SetAnchorOffset({ -5, 0 }, 51);
+	player.SetAnchorOffset({ -5, 0 }, 52);
+	player.SetAnchorOffset({ -5, 0 }, 53);
+	player.SetAnchorOffset({ -5, 0 }, 54);
+
 	//down move 55-61
-	player.SetSpriteClip(725, 47, 16, 24, 55);
-	player.SetSpriteClip(760, 48, 16, 23, 56);
-	player.SetSpriteClip(795, 49, 16, 22, 57);
-	player.SetSpriteClip(830, 49, 16, 22, 58);
-	player.SetSpriteClip(865, 49, 16, 22, 59);
-	player.SetSpriteClip(900, 48, 16, 23, 60);
-	player.SetSpriteClip(935, 47, 16, 24, 61);
+	player.SetSpriteClip(0, 136, 45, 45, 55);
+	player.SetSpriteClip(46, 136, 45, 45, 56);
+	player.SetSpriteClip(91, 136, 45, 45, 57);
+	player.SetSpriteClip(136, 136, 45, 45, 58);
+	player.SetSpriteClip(181, 136, 45, 45, 59);
+	player.SetSpriteClip(226, 136, 45, 45, 60);
+	player.SetSpriteClip(271, 136, 45, 45, 61);
+
+	player.SetAnchorOffset({ -5, 0 }, 55);
+	player.SetAnchorOffset({ -5, 0 }, 56);
+	player.SetAnchorOffset({ -5, 0 }, 57);
+	player.SetAnchorOffset({ -5, 0 }, 58);
+	player.SetAnchorOffset({ -5, 0 }, 59);
+	player.SetAnchorOffset({ -5, 0 }, 60);
+	player.SetAnchorOffset({ -5, 0 }, 61);
 
 
-	//player.SetSpriteClip(90, 1, 30, 30, 3);									//Player Set Sprite Clips			up...
-	//player.SetSpriteClip(90, 31, 30, 30, 17);								//Player Set Sprite Clips			up move...
-	//player.SetSpriteClip(30, 1, 30, 30, 1);									//Player Set Sprite Clips			down...
-	//player.SetSpriteClip(30, 31, 30, 30, 15);								//Player Set Sprite Clips			down move...
-	//player.SetSpriteClip(120, 1, 30, 30, 4);								//Player Set Sprite Clips			right...
-	//player.SetSpriteClip(120, 31, 30, 30, 18);								//Player Set Sprite Clips			right move...
-	//player.SetSpriteClip(60, 1, 30, 30, 2);									//Player Set Sprite Clips			left...
-	//player.SetSpriteClip(60, 31, 30, 30, 16);								//Player Set Sprite Clips			left move...
-	//player.SetSpriteClip(170, 141, 30, 31, 61);								//Player Set Sprite Clips			first left attack...
-	//player.SetSpriteClip(173, 109, 30, 30, 48);								//Player Set Sprite Clips			second left attack...
-	//player.SetSpriteClip(173, 71, 30, 30, 34);								//Player Set Sprite Clips			last left attack...
-	//player.SetSpriteClip(203, 142, 30, 30, 62);								//Player Set Sprite Clips			last right attack...
-	//player.SetSpriteClip(203, 109, 30, 30, 49);								//Player Set Sprite Clips			second right attack...
-	//player.SetSpriteClip(203, 77, 30, 31, 35);								//Player Set Sprite Clips			first right attack...
-	//player.SetSpriteClip(300, 0, 25,30, 65);									//Player Set Sprite Clips			last up attack...
-	//player.SetAnchorOffset({ -8, -10 }, 65);
-	//player.SetAnchorOffset({ -16, -13 }, 61);								//Player Set Sprite Clips			first left attack...
-	//player.SetAnchorOffset({ -23, -10 }, 48);								//Player Set Sprite Clips			second left attack...
-	//player.SetAnchorOffset({ -26, -5 }, 34);								//Player Set Sprite Clips			last left attack...
-	//player.SetAnchorOffset({ 4, 0 }, 62);									//Player Set Sprite Clips			last right attack...
-	//player.SetAnchorOffset({ 2, -10 }, 49);									//Player Set Sprite Clips			second right attack...
-	//player.SetAnchorOffset({ -11, -13 }, 35);								//Player Set Sprite Clips			first right attack...=>2
-	player.ConfigureCollision(true, true, { 5,10 }, { 28,15 });				//Player Collision
+	player.ConfigureCollision(true, true, { 10,10 }, { 17,15 });				//Player Collision
 	player.AddCollidableEntity(tree);										//Player/Sprite Collision
 	player.AddCollidableEntity(tree2);										//Player/Sprite Collision
 	player.AddCollidableEntity(redHouse1);									//Player/Sprite Collision
@@ -511,6 +566,116 @@ void InitEntities() {
 	//WEATHER STATES WEATHER SYSTEM
 	weatherSystem.Init(&sdlInit);											//Initialize sdl for the weather system
 
+	//NPC GUARD
+	guard.SetTexturePath("textures/link_walk_attack.png");
+	sdlInit.LoadTexture(guard);
+	guard.SetPosition({ 350,200 });
+	guard.SetSize(45, 45);
+	guard.InitSpriteSheet(0, 21, 4);
+
+	//up move 33-39
+	guard.SetSpriteClip(0, 91, 45, 45, 33);
+	guard.SetSpriteClip(46, 91, 45, 45, 34);
+	guard.SetSpriteClip(91, 91, 45, 45, 35);
+	guard.SetSpriteClip(136, 91, 45, 45, 36);
+	guard.SetSpriteClip(181, 91, 45, 45, 37);
+	guard.SetSpriteClip(226, 91, 45, 45, 38);
+	guard.SetSpriteClip(271, 91, 45, 45, 39);
+	
+	guard.SetAnchorOffset({ -5, 0 }, 33);
+	guard.SetAnchorOffset({ -5, 0 }, 34);
+	guard.SetAnchorOffset({ -5, 0 }, 35);
+	guard.SetAnchorOffset({ -5, 0 }, 36);
+	guard.SetAnchorOffset({ -5, 0 }, 37);
+	guard.SetAnchorOffset({ -5, 0 }, 38);
+	guard.SetAnchorOffset({ -5, 0 }, 39);
+
+	//left move 40-47
+	guard.SetSpriteClip(316, 91, 45, 45, 40);
+	guard.SetSpriteClip(361, 91, 45, 45, 41);
+	guard.SetSpriteClip(406, 91, 45, 45, 42);
+	guard.SetSpriteClip(451, 91, 45, 45, 43);
+	guard.SetSpriteClip(496, 91, 45, 45, 44);
+	guard.SetSpriteClip(541, 91, 45, 45, 45);
+	guard.SetSpriteClip(586, 91, 45, 45, 46);
+	
+	guard.SetAnchorOffset({ 0, 0 }, 40);
+	guard.SetAnchorOffset({ 0, 0 }, 41);
+	guard.SetAnchorOffset({ 0, 0 }, 42);
+	guard.SetAnchorOffset({ 0, 0 }, 43);
+	guard.SetAnchorOffset({ 0, 0 }, 44);
+	guard.SetAnchorOffset({ 0, 0 }, 45);
+	guard.SetAnchorOffset({ 0, 0 }, 46);
+
+	//right move 48-54
+	guard.SetSpriteClip(631, 91, 45, 45, 48);
+	guard.SetSpriteClip(676, 91, 45, 45, 49);
+	guard.SetSpriteClip(721, 91, 45, 45, 50);
+	guard.SetSpriteClip(766, 91, 45, 45, 51);
+	guard.SetSpriteClip(811, 91, 45, 45, 52);
+	guard.SetSpriteClip(856, 91, 45, 45, 53);
+	guard.SetSpriteClip(901, 91, 45, 45, 54);
+	
+	guard.SetAnchorOffset({ -5, 0 }, 48);
+	guard.SetAnchorOffset({ -5, 0 }, 49);
+	guard.SetAnchorOffset({ -5, 0 }, 50);
+	guard.SetAnchorOffset({ -5, 0 }, 51);
+	guard.SetAnchorOffset({ -5, 0 }, 52);
+	guard.SetAnchorOffset({ -5, 0 }, 53);
+	guard.SetAnchorOffset({ -5, 0 }, 54);
+
+	//down move 55-61
+	guard.SetSpriteClip(0, 136, 45, 45, 55);
+	guard.SetSpriteClip(46, 136, 45, 45, 56);
+	guard.SetSpriteClip(91, 136, 45, 45, 57);
+	guard.SetSpriteClip(136, 136, 45, 45, 58);
+	guard.SetSpriteClip(181, 136, 45, 45, 59);
+	guard.SetSpriteClip(226, 136, 45, 45, 60);
+	guard.SetSpriteClip(271, 136, 45, 45, 61);
+	
+	guard.SetAnchorOffset({ -5, 0 }, 55);
+	guard.SetAnchorOffset({ -5, 0 }, 56);
+	guard.SetAnchorOffset({ -5, 0 }, 57);
+	guard.SetAnchorOffset({ -5, 0 }, 58);
+	guard.SetAnchorOffset({ -5, 0 }, 59);
+	guard.SetAnchorOffset({ -5, 0 }, 60);
+	guard.SetAnchorOffset({ -5, 0 }, 61);
+
+	guard.ConfigureCollision(true, true, { 10, 10 }, { 17,15 });
+
+	guard.AddCollidableEntity(tree);										//Player/Sprite Collision
+	guard.AddCollidableEntity(tree2);										//Player/Sprite Collision
+	guard.AddCollidableEntity(redHouse1);									//Player/Sprite Collision
+	guard.AddCollidableEntity(redHouse2);									//Player/Sprite Collision
+	guard.AddCollidableEntity(blueHouse2);									//Player/Sprite Collision
+	guard.AddCollidableEntity(blueHouse3);									//Player/Sprite Collision
+	guard.AddCollidableEntity(blocker);									//Player/Sprite Collision
+	guard.AddCollidableEntity(blocker2);									//Player/Sprite Collision
+	guard.AddCollidableEntity(hedgeTopLeft);								//Player/Sprite Collision
+	guard.AddCollidableEntity(hedgeTopLeftSide);							//Player/Sprite Collision
+	guard.AddCollidableEntity(hedgeBottomLeft);							//Player/Sprite Collision
+	guard.AddCollidableEntity(hedgeBottomLeftSide);						//Player/Sprite Collision
+	guard.AddCollidableEntity(hedgeBottomRight);							//Player/Sprite Collision
+	guard.AddCollidableEntity(hedgeBottomRightSide);						//Player/Sprite Collision
+	guard.AddCollidableEntity(hedgeTopRight);								//Player/Sprite Collision
+	guard.AddCollidableEntity(hedgeTopRightSide);							//Player/Sprite Collision
+	guard.AddCollidableEntity(statueBird);									//Player/Sprite Collision
+	guard.AddCollidableEntity(house2BlackDoor);							//Player/Sprite Collision
+	guard.AddCollidableEntity(bldgInsideBlkDoor);							//Player/Sprite Collision
+	guard.AddCollidableEntity(houseToInside);								//Player/Sprite Collision
+	guard.AddCollidableEntity(houseToOutside);								//Player/Sprite Collision
+	guard.AddCollidableEntity(blockerHouseBorder1);						//Player/Sprite Collision
+	guard.AddCollidableEntity(blockerHouseBorder2);						//Player/Sprite Collision
+	guard.AddCollidableEntity(blockerHouseBorder3);						//Player/Sprite Collision
+	guard.AddCollidableEntity(blockerHouseBorder4);						//Player/Sprite Collision
+	guard.AddCollidableEntity(blockerHouseBorder5);						//Player/Sprite Collision
+	guard.AddCollidableEntity(blockerHouseBorder6);						//Player/Sprite Collision
+	guard.AddCollidableEntity(guyInBed);									//Player/Sprite Collision
+	guard.AddCollidableEntity(witch);										//Player/Sprite Collision
+	guard.AddCollidableEntity(sawGuys);									//Player/Sprite Collision
+	guard.AddCollidableEntity(horizLongbush);								//Player/Sprite Collision
+
+
 	//SPLASH SPRITE SPLASH BACKGROUND
 	splashBackground.SetTexturePath("textures/splashBackground.png");		//AI Texture Path
 	sdlInit.LoadTexture(splashBackground);									//AI Texture Load
@@ -588,12 +753,14 @@ void GameManager::Cleanup(){
 	sdlInit.CleanupSprite(ground1);
 	sdlInit.CleanupSprite(horizLongbush);
 	sdlInit.CleanupSprite(inventory);
+	sdlInit.CleanupSprite(guard);
 	sdlInit.Cleanup();
 }
 void GameManager::Update() {
 /*************************************************				UPDATE				**************************************************/
 	if (ls == LIGHTWORLD) {
 		player.Update();									//Players Update Call
+		guard.Update();
 		animationStates();									//AI Animations Call
 		Inventory();
 		gCamera.LookAt(player);								//Camera Looks At Player
@@ -641,6 +808,7 @@ void GameManager::Render(){
 		sdlInit.DrawSprite(witch);							//Render Sprite Above Player
 		sdlInit.DrawSprite(sawGuys);						//Render Sprite Above Player
 		sdlInit.DrawSprite(buildingInside);					//Render Sprite Above Player
+		sdlInit.DrawSprite(guard);							//Render Sprite Above Player
 		//weatherSystem.Render();
 		if (!invOpen) {
 			sdlInit.DrawHud(magicMeter);					//Render HUD
@@ -686,6 +854,7 @@ void GameManager::Render(){
 		sdlInit.DrawEntityCollider(blockerHouseBorder5);
 		sdlInit.DrawEntityCollider(blockerHouseBorder6);
 		sdlInit.DrawEntityCollider(guyInBed);
+		sdlInit.DrawEntityCollider(guard);
 	}
 }
 

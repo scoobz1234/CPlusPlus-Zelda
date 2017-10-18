@@ -1,7 +1,5 @@
 #include "Player.h"
 #include "Camera.h"
-#include <iostream>
-#include <windows.h>
 
 #define ANIM_RIGHT_COUNT 7
 #define ANIM_LEFT_COUNT 7
@@ -15,13 +13,6 @@
 
 extern float gDeltaTime;
 extern Camera gCamera;
-
-// this is for need coords..
-float oldX;
-float oldY;
-// turn this on if you want to print your players position to the console.
-
-bool needCoords = true;
 
 //Keys held down...
 extern int gHorizKeysHeld;	//keys a and b
@@ -41,13 +32,13 @@ extern bool gFourthKeyUp;	//keys 4
 
 
 namespace {
-	int lastMoveIndex = 4;
+	int lastMoveIndex = 55;
 	int lastAttackIndex = 0;
 }
 
 namespace {
 	//Animation times...
-	float attackTime = 5.0f;
+	float attackTime = .3f;
 
 	//Animation timers...
 	float moveRightTimer = 0.f;
@@ -64,13 +55,13 @@ namespace {
 	//Animation indices...
 	int animRightIndices[ANIM_RIGHT_COUNT] = { 48,49,50,51,52,53,54 };
 	int animLeftIndices[ANIM_LEFT_COUNT] = { 40,41,42,43,44,45,46 };
-	int animUpIndices[ANIM_UP_COUNT] = { 33,34,35,36,37,38,39 };
+	int animUpIndices[ANIM_UP_COUNT] = { 36,37,38,39,35,34,33 };
 	int animDownIndices[ANIM_DOWN_COUNT] = { 55,56,57,58,59,60,61 };
 
 	int animAttackLeftIndices[4][ANIM_ATTACK_COUNT] = {
-		{ 18, 22},//{ 18, 19, 20, 21, 22, 23, 24, 25, 26 },	//right attack...
+		{ 18, 19, 20, 21, 22, 23, 24, 25, 26 },	//right attack...
 		{ 9, 10, 11, 12, 13, 14, 15, 16, 17 },	//left attack...
-		{ 27, 28, 29, 30, 31, 32 },	//down attack...
+		{ 27, 27, 28, 28, 29, 29, 30, 31, 32 },	//down attack...
 		{ 0, 1, 2, 3, 4, 5, 6, 7, 8 }	//up attack...
 	};
 }
@@ -83,14 +74,6 @@ void Player::Update() {
 	Move();
 	Attack();
 	Sprite::Update();
-	
-	if (needCoords == true)	{
-		if(oldX != mPos.x || oldY != mPos.y){
-			std::cout << mPos.x << " " << mPos.y << std::endl;
-			oldX = mPos.x;
-			oldY = mPos.y;
-		}
-	}
 
 }
 

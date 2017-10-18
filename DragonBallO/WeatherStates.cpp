@@ -87,11 +87,11 @@ void WeatherStates::Update() {
 	if (!inside) {
 		switch (mLastWeatherState) {
 		case WeatherState::RAIN:
-			Render();
+			//Render();
 			mRain.Update();
 			break;
 		case WeatherState::FOG:
-			Render();
+			//Render();
 			mFog.Update();
 			break;
 		}

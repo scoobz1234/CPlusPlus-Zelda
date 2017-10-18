@@ -48,6 +48,7 @@ protected:
 
 	//If this entity can move, it needs a move speed...
 	float mMoveSpeed{ 140.f };
+	float mMoveSpeedAI{ 110.f };
 
 	//For collision...
 	std::vector<Entity*> mCollidableEntities;
