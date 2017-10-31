@@ -42,7 +42,7 @@ void NPC::Update() {
 }
 
 void NPC::Move() {
-
+	
 	//Setting velocity...
 	float velocity = mMoveSpeedAI * gDeltaTime;
 
@@ -55,34 +55,26 @@ void NPC::Move() {
 	//Update animations...
 	if (HorizMovement > 0) {
 		moveRightTimer += animMoveSpeed * gDeltaTime;
-
 		int index = (int)moveRightTimer % ANIM_RIGHT_COUNT;
 		mSpriteClipIndex = animRightIndices[index];
-
 		lastMoveIndex = animRightIndices[0];
 	}
 	else if (HorizMovement < 0) {
 		moveLeftTimer += animMoveSpeed * gDeltaTime;
-
 		int index = (int)moveLeftTimer % ANIM_LEFT_COUNT;
 		mSpriteClipIndex = animLeftIndices[index];
-
 		lastMoveIndex = animLeftIndices[0];
 	}
 	else if (VertMovement > 0) {
 		moveDownTimer += animMoveSpeed * gDeltaTime;
-
 		int index = (int)moveDownTimer % ANIM_DOWN_COUNT;
 		mSpriteClipIndex = animDownIndices[index];
-
 		lastMoveIndex = animDownIndices[0];
 	}
 	else if (VertMovement < 0) {
 		moveUpTimer += animMoveSpeed * gDeltaTime;
-
 		int index = (int)moveUpTimer % ANIM_UP_COUNT;
 		mSpriteClipIndex = animUpIndices[index];
-
 		lastMoveIndex = animUpIndices[0];
 	}
 	else {

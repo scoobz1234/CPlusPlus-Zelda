@@ -23,8 +23,8 @@ using namespace std::this_thread;
 using namespace std::chrono;
 
 //camera dimensions
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+const int SCREEN_WIDTH = 512;
+const int SCREEN_HEIGHT = 512;
 
 //Window Definitions
 extern SDL_Window* gWindow;
@@ -103,7 +103,8 @@ namespace {
 	MoveTrigger houseToOutside;												//Trigger Sprite
 	WeatherStates weatherSystem;											//Weather System
 	NPC guard;																//AI NPC
-	
+	Sprite Map;
+
 	//SPLASH
 	AISprite splashBackground;
 	AISprite startText;
@@ -675,6 +676,13 @@ void InitEntities() {
 	guard.AddCollidableEntity(sawGuys);									//Player/Sprite Collision
 	guard.AddCollidableEntity(horizLongbush);								//Player/Sprite Collision
 
+	//SPRITE DESERT CASTLE INSIDE
+	Map.SetTexturePath("textures/LightWorld.png");				//Sprite Texture Path
+	sdlInit.LoadTexture(Map);									//Sprite Texture Load
+	Map.SetPosition({ 0,0 });								//Sprite Position
+	Map.SetSize(4110, 4121);										//sprite Size
+	Map.ConfigureCollision(true, false);							//Sprite Collision
+
 
 	//SPLASH SPRITE SPLASH BACKGROUND
 	splashBackground.SetTexturePath("textures/splashBackground.png");		//AI Texture Path
@@ -707,7 +715,7 @@ void InitEntities() {
 	menuBackground.SetSize(640, 480);										//hud Size
 
 	//WORLD GRID INITIALIZATION
-	gWorld.InitWorldGrid({ 0,70 - 35,14,70 - 16 });
+	gWorld.InitWorldGrid({ 0,70 - 25,14,70 - 10 });
 }
 bool GameManager::Init(){
 	bool initSuccess = sdlInit.Setup();
@@ -754,6 +762,7 @@ void GameManager::Cleanup(){
 	sdlInit.CleanupSprite(horizLongbush);
 	sdlInit.CleanupSprite(inventory);
 	sdlInit.CleanupSprite(guard);
+	sdlInit.CleanupSprite(Map);
 	sdlInit.Cleanup();
 }
 void GameManager::Update() {
@@ -784,7 +793,8 @@ void GameManager::Update() {
 void GameManager::Render(){
 	sdlInit.Render();										//Render SDL
 	if (ls == LIGHTWORLD) {
-		sdlInit.DrawSprite(ground1);						//Render Sprite Under Player
+		sdlInit.DrawSprite(Map);
+	//	sdlInit.DrawSprite(ground1);						//Render Sprite Under Player
 		sdlInit.DrawSprite(hedgeTopLeft);					//Render Sprite Under Player
 		sdlInit.DrawSprite(hedgeTopLeftSide);				//Render Sprite Under Player
 		sdlInit.DrawSprite(hedgeTopRight);					//Render Sprite Under Player

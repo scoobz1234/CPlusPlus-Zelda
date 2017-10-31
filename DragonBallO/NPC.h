@@ -10,6 +10,13 @@ public:
 	virtual ~NPC() override {}
 
 	void Update() override;
+	enum NPCStates {
+		GUARD,
+		PATROL,
+		CHASE,
+		ATTACK
+
+	};
 
 public:
 	void Move();
